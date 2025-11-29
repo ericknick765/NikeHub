@@ -1,0 +1,57 @@
+local UIS = game:GetService("UserInputService")
+local player = game.Players.LocalPlayer
+local PlayerGui = player:WaitForChild("PlayerGui")
+
+local base = workspace.Maps:WaitForChild(player.Name .. "Tycoon")
+local PlacedBox = base:WaitForChild("PlacedBox")
+
+local screenGui = Instance.new("ScreenGui")
+screenGui.Name = "TeleportGUI"
+screenGui.ResetOnSpawn = false
+screenGui.IgnoreGuiInset = true
+screenGui.Parent = PlayerGui
+
+local mobileBtn = Instance.new("TextButton")
+mobileBtn.Name = "TeleportButton"
+mobileBtn.Size = UDim2.new(0, 180, 0, 70)
+mobileBtn.Position = UDim2.new(0.5, -90, 0.8, 0)
+mobileBtn.BackgroundColor3 = Color3.fromRGB(0, 150, 255)
+mobileBtn.Text = "Teleportar"
+mobileBtn.TextColor3 = Color3.new(1, 1, 1)
+mobileBtn.TextScaled = true
+mobileBtn.BorderSizePixel = 0
+mobileBtn.Visible = true
+mobileBtn.Parent = screenGui
+
+local corner = Instance.new("UICorner")
+corner.CornerRadius = UDim.new(0, 12)
+corner.Parent = mobileBtn
+
+for _, model in ipairs(PlacedBox:GetChildren()) do
+	if model:IsA("Model") and not model.PrimaryPart then
+		local part = model:FindFirstChildWhichIsA("BasePart")
+		if part then model.PrimaryPart = part end
+	end
+end
+
+local function TeleportarModelos()
+	local char = player.Character or player.CharacterAdded:Wait()
+	local hrp = char:WaitForChild("HumanoidRootPart")
+
+	for _, model in ipairs(PlacedBox:GetChildren()) do
+		if model.PrimaryPart then
+			model:SetPrimaryPartCFrame(hrp.CFrame * CFrame.new(0, 3, -3))
+		end
+	end
+end
+
+UIS.InputBegan:Connect(function(input, gp)
+	if gp then return end
+	if input.KeyCode == Enum.KeyCode.E then
+		TeleportarModelos()
+	end
+end)
+
+mobileBtn.MouseButton1Click:Connect(function()
+	TeleportarModelos()
+end)
