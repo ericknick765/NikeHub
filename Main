@@ -11,8 +11,6 @@ screenGui.ResetOnSpawn = false
 screenGui.IgnoreGuiInset = true
 screenGui.Parent = PlayerGui
 
-local isMobile = UIS.TouchEnabled and not UIS.KeyboardEnabled
-
 local mobileBtn = Instance.new("TextButton")
 mobileBtn.Name = "TeleportButton"
 mobileBtn.Size = UDim2.new(0, 180, 0, 70)
@@ -22,7 +20,7 @@ mobileBtn.Text = "Teleportar"
 mobileBtn.TextColor3 = Color3.new(1, 1, 1)
 mobileBtn.TextScaled = true
 mobileBtn.BorderSizePixel = 0
-mobileBtn.Visible = isMobile
+mobileBtn.Visible = true
 mobileBtn.Parent = screenGui
 
 local corner = Instance.new("UICorner")
@@ -47,13 +45,11 @@ local function TeleportarModelos()
 	end
 end
 
+mobileBtn.MouseButton1Click:Connect(TeleportarModelos)
+
 UIS.InputBegan:Connect(function(input, gp)
 	if gp then return end
 	if input.KeyCode == Enum.KeyCode.E then
 		TeleportarModelos()
 	end
-end)
-
-mobileBtn.MouseButton1Click:Connect(function()
-	TeleportarModelos()
 end)
