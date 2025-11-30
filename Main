@@ -42,10 +42,9 @@ local Tab = Window:CreateTab("Main", 4483362458) -- Title, Image
 
 local Button = Tab:CreateButton({
 	Name = "Unlock All Shop (No Rebirth)",
-	Callback = function()
+	Callback = function(ByPass)
 		local Player = game.Players.LocalPlayer
 		local Leaderstats = Player:WaitForChild("leaderstats", 3)
-		Button:Set("Unlock All Shop (No Rebirth)")
 		if Leaderstats then
 
 			local Rebirth = Leaderstats:WaitForChild("Rebirth", 5)
