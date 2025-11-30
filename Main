@@ -92,8 +92,7 @@ local Toggle = Tab:CreateToggle({
 
 			processarModelos(function(model)
 				if model.PrimaryPart then
-					model:SetPrimaryPartCFrame(hrp.CFrame * CFrame.new(0, 3, -3 - offset))
-					offset = offset + 5
+					model:SetPrimaryPartCFrame(hrp.CFrame * CFrame.new(0, 0, -3 - offset))
 				else
 					warn(model.Name .. " não tem PrimaryPart!")
 				end
