@@ -48,7 +48,6 @@ local Toggle = Tab:CreateToggle({
 		-- The function that takes place when the toggle is pressed
 		-- The variable (Value) is a boolean on whether the toggle is true or false
 		local AutoFarm = true
-		
 		local UIS = game:GetService("UserInputService")
 		local player = game.Players.LocalPlayer
 		local base = workspace.Maps:WaitForChild(player.Name .. "Tycoon")
@@ -92,14 +91,12 @@ local Toggle = Tab:CreateToggle({
 
 			processarModelos(function(model)
 				if model.PrimaryPart then
-					model:SetPrimaryPartCFrame(hrp.CFrame * CFrame.new(0, 0, -3 - offset))
+					model:SetPrimaryPartCFrame(hrp.CFrame * CFrame.new(0, 0, -2 - offset))
 				else
 					warn(model.Name .. " não tem PrimaryPart!")
 				end
 			end)
 
-			task.wait(5)
+			task.wait(2)
 		end
-
-	end,
 })
