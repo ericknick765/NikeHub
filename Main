@@ -1,43 +1,25 @@
--- MAIN SCRIPT COMPATÍVEL COM MOBILE + PC + EXECUTOR
 local Players = game:GetService("Players")
 local UIS = game:GetService("UserInputService")
 local player = Players.LocalPlayer
 
 local function WaitForTycoon()
     local maps = workspace:WaitForChild("Maps")
-
     for _, model in ipairs(maps:GetChildren()) do
         if model:IsA("Model") then
             local owner = model:FindFirstChild("TycoonOwner")
-            if owner and owner:IsA("StringValue") then
-                if owner.Value == player.Name then
-                    return model
-                end
+            if owner and owner:IsA("StringValue") and owner.Value == player.Name then
+                return model
             end
         end
     end
-
     return nil
 end
 
--- 🔍 encontra o Tycoon
 local tycoon = WaitForTycoon()
-if not tycoon then
-    warn("Nenhum tycoon encontrado para:", player.Name)
-    return
-end
+if not tycoon then return end
 
--- 🗂 pega PlacedBox ou PlacedBoxes automaticamente
-local PlacedBox = tycoon:FindFirstChild("PlacedBox") or tycoon:FindFirstChild("PlacedBoxes")
-
-if not PlacedBox then
-    warn("O Tycoon do jogador não possui PlacedBox ou PlacedBoxes!")
-    return
-end
-
-----------------------------------------------------------
--- GUI MOBILE / PC
-----------------------------------------------------------
+local PlacedBoxes = tycoon:FindFirstChild("PlacedBoxes") or tycoon:FindFirstChild("PlacedBox")
+if not PlacedBoxes then return end
 
 local playerGui = player:WaitForChild("PlayerGui")
 
@@ -59,21 +41,15 @@ local corner = Instance.new("UICorner")
 corner.CornerRadius = UDim.new(0, 12)
 corner.Parent = button
 
-----------------------------------------------------------
--- TELEPORTE
-----------------------------------------------------------
-
 local function Teleportar()
     local char = player.Character or player.CharacterAdded:Wait()
     local hrp = char:WaitForChild("HumanoidRootPart")
-
-    for _, obj in ipairs(PlacedBox:GetChildren()) do
+    for _, obj in ipairs(PlacedBoxes:GetChildren()) do
         if obj:IsA("Model") then
             if not obj.PrimaryPart then
                 local p = obj:FindFirstChildWhichIsA("BasePart")
                 if p then obj.PrimaryPart = p end
             end
-
             if obj.PrimaryPart then
                 obj:SetPrimaryPartCFrame(hrp.CFrame * CFrame.new(0, 3, -4))
             end
@@ -81,7 +57,6 @@ local function Teleportar()
     end
 end
 
--- PC → tecla E
 UIS.InputBegan:Connect(function(input, gp)
     if gp then return end
     if input.KeyCode == Enum.KeyCode.E then
@@ -89,7 +64,6 @@ UIS.InputBegan:Connect(function(input, gp)
     end
 end)
 
--- MOBILE / PC → botão
 button.MouseButton1Click:Connect(function()
     Teleportar()
 end)
