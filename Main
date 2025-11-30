@@ -1,42 +1,30 @@
 local Players = game:GetService("Players")
-local player = Players.LocalPlayer
 local UIS = game:GetService("UserInputService")
+local player = Players.LocalPlayer
 
--- Encontra o Tycoon do jogador lendo a propriedade TycoonOwner
-local maps = workspace:WaitForChild("Maps")
-local myTycoon = nil
+-- Garantir que o PlayerGui existe
+local playerGui = player:WaitForChild("PlayerGui")
 
-for _, tycoon in ipairs(maps:GetChildren()) do
-    if tycoon:IsA("Model") and tycoon:FindFirstChild("TycoonOwner") then
-        if tycoon.TycoonOwner.Value == player.Name then
-            myTycoon = tycoon
-            break
-        end
-    end
+-- Criar ScreenGui se não existir
+local screenGui = playerGui:FindFirstChild("MobileUI")
+if not screenGui then
+    screenGui = Instance.new("ScreenGui")
+    screenGui.Name = "MobileUI"
+    screenGui.ResetOnSpawn = false
+    screenGui.Parent = playerGui
 end
 
-if not myTycoon then
-    warn("Tycoon do jogador NÃO encontrado!")
-    return
-end
-
-local placedBox = myTycoon:WaitForChild("PlacedBox")
-
--- Cria botão no mobile
+-- Criar o botão APENAS NO CELULAR
 if UIS.TouchEnabled then
-    local button = Instance.new("TextButton")
-    button.Size = UDim2.new(0, 200, 0, 70)
-    button.Position = UDim2.new(0.5, -100, 0.8, 0) -- Centro inferior
-    button.Text = "Rodar Script"
-    button.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
-    button.TextColor3 = Color3.fromRGB(255, 255, 255)
-    button.Parent = game.Players.LocalPlayer:WaitForChild("PlayerGui"):WaitForChild("ScreenGui")
-    
-    button.MouseButton1Click:Connect(function()
-        for _, model in ipairs(placedBox:GetChildren()) do
-            if model:IsA("Model") then
-                print("Achei um modelo:", model.Name)
-            end
-        end
+    local btn = Instance.new("TextButton")
+    btn.Size = UDim2.new(0, 200, 0, 70)
+    btn.Position = UDim2.new(0.5, -100, 0.8, 0)
+    btn.Text = "Rodar"
+    btn.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
+    btn.TextColor3 = Color3.fromRGB(255, 255, 255)
+    btn.Parent = screenGui
+
+    btn.MouseButton1Click:Connect(function()
+        print("BOTÃO MOBILE FUNCIONANDO!")
     end)
 end
