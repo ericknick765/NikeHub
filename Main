@@ -1,44 +1,26 @@
-local UIS = game:GetService("UserInputService")
 local player = game.Players.LocalPlayer
-local PlayerGui = player:WaitForChild("PlayerGui")
-
--- 🔍 Procurar Tycoon do jogador usando a propriedade TycoonOwner
 local Maps = workspace:WaitForChild("Maps")
-local base = nil
 
-for _, tycoon in ipairs(Maps:GetChildren()) do
-	if tycoon:IsA("Model") and tycoon:FindFirstChild("TycoonOwner") then
-		if tycoon.TycoonOwner.Value == player then
-			base = tycoon
+local tycoon -- vamos guardar o tycoon correto aqui
+
+-- Procura o Tycoon do jogador
+for _, model in ipairs(Maps:GetChildren()) do
+	if model:IsA("Model") and model:FindFirstChild("TycoonOwner") then
+		if model.TycoonOwner.Value == player.Name then
+			tycoon = model
 			break
 		end
 	end
 end
 
-if not base then
+if not tycoon then
 	warn("Tycoon do jogador não encontrado!")
 	return
 end
 
-local PlacedBox = base:WaitForChild("PlacedBoxes")
+local placedBoxes = tycoon:WaitForChild("PlacedBoxes")
 
--- 🔘 Criar GUI
-local screenGui = Instance.new("ScreenGui")
-screenGui.Name = "TeleportGUI"
-screenGui.Parent = PlayerGui
-
-local mobileBtn = Instance.new("TextButton")
-mobileBtn.Size = UDim2.new(0, 180, 0, 70)
-mobileBtn.Position = UDim2.new(0.5, -90, 0.8, 0)
-mobileBtn.BackgroundColor3 = Color3.fromRGB(0, 150, 255)
-mobileBtn.Text = "Teleportar"
-mobileBtn.TextScaled = true
-mobileBtn.Parent = screenGui
-
-local corner = Instance.new("UICorner")
-corner.CornerRadius = UDim.new(0, 12)
-corner.Parent = mobileBtn
-
--- 🔧 Corrigir PrimaryPart dos modelos
-for _, model in ipairs(PlacedBox:GetChildren()) do
-	if model:IsA("Model") and not model.Prim
+-- Se quiser pegar TODOS os objetos dentro da pasta:
+for _, obj in ipairs(placedBoxes:GetChildren()) do
+	print("Objeto encontrado:", obj.Name)
+end
