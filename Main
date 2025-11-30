@@ -1,10 +1,5 @@
 local Rayfield = loadstring(game:HttpGet('https://sirius.menu/rayfield'))()
 
-local UIS = game:GetService("UserInputService")
-local player = game.Players.LocalPlayer
-local base = workspace.Maps:WaitForChild(player.Name .. "Tycoon")
-local PlacedBox = base:WaitForChild("PlacedBoxes")
-
 
 local Window = Rayfield:CreateWindow({
 	Name = "NikeHub",
@@ -53,6 +48,12 @@ local Toggle = Tab:CreateToggle({
 		-- The function that takes place when the toggle is pressed
 		-- The variable (Value) is a boolean on whether the toggle is true or false
 		local AutoFarm = true
+		
+		local UIS = game:GetService("UserInputService")
+		local player = game.Players.LocalPlayer
+		local base = workspace.Maps:WaitForChild(player.Name .. "Tycoon")
+		local PlacedBoxes = base:WaitForChild("PlacedBoxes")
+
 		for _, model in ipairs(PlacedBoxes:GetChildren()) do
 			if model:IsA("Model") and not model.PrimaryPart then
 
