@@ -64,13 +64,13 @@ local Toggle = Tab:CreateToggle({
 	Callback = function(AutoFarm)
 		local AutoFarm = true
 		while true do
+			local UIS = game:GetService("UserInputService")
+			local player = game.Players.LocalPlayer
+			local base = workspace.Maps:WaitForChild(player.Name .. "Tycoon")
+			local PlacedBoxes = base:WaitForChild("PlacedBoxes")
+
+
 			if AutoFarm then
-				local UIS = game:GetService("UserInputService")
-				local player = game.Players.LocalPlayer
-				local base = workspace.Maps:WaitForChild(player.Name .. "Tycoon")
-				local PlacedBoxes = base:WaitForChild("PlacedBoxes")
-
-
 				local function processarModelos(func)
 					local checked = {}
 					local nextModel = PlacedBoxes:FindFirstChildWhichIsA("Model")
