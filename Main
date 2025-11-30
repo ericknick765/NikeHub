@@ -48,6 +48,7 @@ local Toggle = Tab:CreateToggle({
 		-- The function that takes place when the toggle is pressed
 		-- The variable (Value) is a boolean on whether the toggle is true or false
 		local AutoFarm = true
+		
 		local UIS = game:GetService("UserInputService")
 		local player = game.Players.LocalPlayer
 		local base = workspace.Maps:WaitForChild(player.Name .. "Tycoon")
@@ -97,6 +98,8 @@ local Toggle = Tab:CreateToggle({
 				end
 			end)
 
-			task.wait(2)
+			task.wait(5)
 		end
+
+	end,
 })
