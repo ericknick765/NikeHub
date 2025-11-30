@@ -53,3 +53,43 @@ button.Text = "Teleportar Caixas"
 button.BackgroundColor3 = Color3.fromRGB(30, 150, 255)
 button.TextColor3 = Color3.new(1, 1, 1)
 button.TextScaled = true
+button.Parent = screenGui
+
+local corner = Instance.new("UICorner")
+corner.CornerRadius = UDim.new(0, 12)
+corner.Parent = button
+
+----------------------------------------------------------
+-- TELEPORTE
+----------------------------------------------------------
+
+local function Teleportar()
+    local char = player.Character or player.CharacterAdded:Wait()
+    local hrp = char:WaitForChild("HumanoidRootPart")
+
+    for _, obj in ipairs(PlacedBox:GetChildren()) do
+        if obj:IsA("Model") then
+            if not obj.PrimaryPart then
+                local p = obj:FindFirstChildWhichIsA("BasePart")
+                if p then obj.PrimaryPart = p end
+            end
+
+            if obj.PrimaryPart then
+                obj:SetPrimaryPartCFrame(hrp.CFrame * CFrame.new(0, 3, -4))
+            end
+        end
+    end
+end
+
+-- PC → tecla E
+UIS.InputBegan:Connect(function(input, gp)
+    if gp then return end
+    if input.KeyCode == Enum.KeyCode.E then
+        Teleportar()
+    end
+end)
+
+-- MOBILE / PC → botão
+button.MouseButton1Click:Connect(function()
+    Teleportar()
+end)
