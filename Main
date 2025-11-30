@@ -1,26 +1,42 @@
-local player = game.Players.LocalPlayer
-local Maps = workspace:WaitForChild("Maps")
+local Players = game:GetService("Players")
+local player = Players.LocalPlayer
+local UIS = game:GetService("UserInputService")
 
-local tycoon -- vamos guardar o tycoon correto aqui
+-- Encontra o Tycoon do jogador lendo a propriedade TycoonOwner
+local maps = workspace:WaitForChild("Maps")
+local myTycoon = nil
 
--- Procura o Tycoon do jogador
-for _, model in ipairs(Maps:GetChildren()) do
-	if model:IsA("Model") and model:FindFirstChild("TycoonOwner") then
-		if model.TycoonOwner.Value == player.Name then
-			tycoon = model
-			break
-		end
-	end
+for _, tycoon in ipairs(maps:GetChildren()) do
+    if tycoon:IsA("Model") and tycoon:FindFirstChild("TycoonOwner") then
+        if tycoon.TycoonOwner.Value == player.Name then
+            myTycoon = tycoon
+            break
+        end
+    end
 end
 
-if not tycoon then
-	warn("Tycoon do jogador não encontrado!")
-	return
+if not myTycoon then
+    warn("Tycoon do jogador NÃO encontrado!")
+    return
 end
 
-local placedBoxes = tycoon:WaitForChild("PlacedBoxes")
+local placedBox = myTycoon:WaitForChild("PlacedBox")
 
--- Se quiser pegar TODOS os objetos dentro da pasta:
-for _, obj in ipairs(placedBoxes:GetChildren()) do
-	print("Objeto encontrado:", obj.Name)
+-- Cria botão no mobile
+if UIS.TouchEnabled then
+    local button = Instance.new("TextButton")
+    button.Size = UDim2.new(0, 200, 0, 70)
+    button.Position = UDim2.new(0.5, -100, 0.8, 0) -- Centro inferior
+    button.Text = "Rodar Script"
+    button.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
+    button.TextColor3 = Color3.fromRGB(255, 255, 255)
+    button.Parent = game.Players.LocalPlayer:WaitForChild("PlayerGui"):WaitForChild("ScreenGui")
+    
+    button.MouseButton1Click:Connect(function()
+        for _, model in ipairs(placedBox:GetChildren()) do
+            if model:IsA("Model") then
+                print("Achei um modelo:", model.Name)
+            end
+        end
+    end)
 end
