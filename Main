@@ -44,10 +44,8 @@ local Button = Tab:CreateButton({
 	Name = "Unlock All Shop (No Rebirth)",
 	Callback = function()
 		local Player = game.Players.LocalPlayer
-
-
 		local Leaderstats = Player:WaitForChild("leaderstats", 3)
-
+		Button:Set("Unlock All Shop (No Rebirth)")
 		if Leaderstats then
 
 			local Rebirth = Leaderstats:WaitForChild("Rebirth", 5)
@@ -85,5 +83,7 @@ local Toggle = Tab:CreateToggle({
 			end
 			task.wait(0.5)
 		end
+
+		
 	end,
 })
