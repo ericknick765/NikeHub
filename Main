@@ -4,7 +4,7 @@ local Rayfield = loadstring(game:HttpGet('https://sirius.menu/rayfield'))()
 local Window = Rayfield:CreateWindow({
 	Name = "NikeHub",
 	Icon = 0, -- Icon in Topbar. Can use Lucide Icons (string) or Roblox Image (number). 0 to use no icon (default).
-	LoadingTitle = "Froste e incrivelmente Viado",
+	LoadingTitle = "Script Simples Com AutoFarm e Desbloquia Loja..",
 	LoadingSubtitle = "by ericknick",
 	ShowText = "Rayfield", -- for mobile users to unhide rayfield, change if you'd like
 	Theme = "Default", -- Check https://docs.sirius.menu/rayfield/configuration/themes
@@ -66,7 +66,8 @@ local Toggle = Tab:CreateToggle({
 		local player = game.Players.LocalPlayer
 		local base = workspace.Maps:WaitForChild(player.Name .. "Tycoon")
 		local PlacedBoxes = base:WaitForChild("PlacedBoxes")
-		local AutoFarm = true -- apenas para garantir que está definido
+		local AutoFarm = true
+		Toggle:Set(false)
 
 		while true do
 			task.wait(0.1)
