@@ -62,13 +62,14 @@ local Toggle = Tab:CreateToggle({
 	CurrentValue = false,
 	Flag = "Toggle1", -- A flag is the identifier for the configuration file, make sure every element has a different flag if you're using configuration saving to ensure no overlaps
 	Callback = function(AutoFarm)
-		local AutoFarm = true
-		while true do
-			local UIS = game:GetService("UserInputService")
-			local player = game.Players.LocalPlayer
-			local base = workspace.Maps:WaitForChild(player.Name .. "Tycoon")
-			local PlacedBoxes = base:WaitForChild("PlacedBoxes")
+		local UIS = game:GetService("UserInputService")
+		local player = game.Players.LocalPlayer
+		local base = workspace.Maps:WaitForChild(player.Name .. "Tycoon")
+		local PlacedBoxes = base:WaitForChild("PlacedBoxes")
+		local AutoFarm = true -- apenas para garantir que está definido
 
+		while true do
+			task.wait(0.5)
 
 			if AutoFarm then
 				local function processarModelos(func)
@@ -100,21 +101,20 @@ local Toggle = Tab:CreateToggle({
 						end
 					end
 				end)
+
 				local char = player.Character or player.CharacterAdded:Wait()
 				local hrp = char:WaitForChild("HumanoidRootPart")
 				local offset = 0
 
 				processarModelos(function(model)
 					if model.PrimaryPart then
-						model:SetPrimaryPartCFrame(hrp.CFrame * CFrame.new(0, 0, -2 - offset))
-						offset = offset + 5
+						model:SetPrimaryPartCFrame(hrp.CFrame * CFrame.new(0, -2, -2 - offset))
 					else
 						warn(model.Name .. " não tem PrimaryPart!")
 					end
 				end)
-
-				task.wait(2)
 			end
 		end
+
 	end
 })
