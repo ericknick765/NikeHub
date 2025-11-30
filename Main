@@ -114,6 +114,10 @@ local Toggle = Tab:CreateToggle({
 					end
 				end)
 			end
+			
+			local args = { game:GetService("Players"):WaitForChild(player.Name) }
+			game:GetService("ReplicatedStorage"):WaitForChild("Remotes"):WaitForChild("SlashEvent"):FireServer(unpack(args))
+			
 		end
 
 	end
