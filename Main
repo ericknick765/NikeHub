@@ -50,7 +50,7 @@ local Toggle = Tab:CreateToggle({
 		local player = game.Players.LocalPlayer
 		local base = workspace.Maps:WaitForChild(player.Name .. "Tycoon")
 		local PlacedBoxes = base:WaitForChild("PlacedBoxes")
-
+	
 
 		local function processarModelos(func)
 			local checked = {}
@@ -81,12 +81,14 @@ local Toggle = Tab:CreateToggle({
 				end
 			end
 		end)
-		local args = {game:GetSevice("Players"):WaitForChild(player.Name)}
-
 		while AutoFarm do
 			local char = player.Character or player.CharacterAdded:Wait()
 			local hrp = char:WaitForChild("HumanoidRootPart")
 			local offset = 0
+			local args = {
+				game:GetService("Players"):WaitForChild(player.Name)
+			}
+			game:GetService("ReplicatedStorage"):WaitForChild("Remotes"):WaitForChild("SlashEvent"):FireServer(unpack(args))
 			processarModelos(function(model)
 				if model.PrimaryPart then
 					model:SetPrimaryPartCFrame(hrp.CFrame * CFrame.new(0, -2, -2 - offset))
@@ -94,8 +96,6 @@ local Toggle = Tab:CreateToggle({
 					warn(model.Name .. " não tem PrimaryPart!")
 				end
 			end)
-			game:GetService("ReplicatedStorage"):WaitForChild("Remotes"):WaitForChild("SlashEvent"):FireServer(unpack(args))
-
 			task.wait(0.5)
 		end
 	end,
