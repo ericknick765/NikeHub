@@ -1,69 +1,83 @@
-local Players = game:GetService("Players")
+local Rayfield = loadstring(game:HttpGet('https://sirius.menu/rayfield'))()
+
 local UIS = game:GetService("UserInputService")
-local player = Players.LocalPlayer
+local player = game.Players.LocalPlayer
+local base = workspace.Maps:WaitForChild(player.Name .. "Tycoon")
+local PlacedBox = base:WaitForChild("PlacedBoxes")
 
-local function WaitForTycoon()
-    local maps = workspace:WaitForChild("Maps")
-    for _, model in ipairs(maps:GetChildren()) do
-        if model:IsA("Model") then
-            local owner = model:FindFirstChild("TycoonOwner")
-            if owner and owner:IsA("StringValue") and owner.Value == player.Name then
-                return model
-            end
-        end
-    end
-    return nil
-end
 
-local tycoon = WaitForTycoon()
-if not tycoon then return end
+local Window = Rayfield:CreateWindow({
+	Name = "NikeHub",
+	Icon = 0, -- Icon in Topbar. Can use Lucide Icons (string) or Roblox Image (number). 0 to use no icon (default).
+	LoadingTitle = "Rayfield Interface Suite",
+	LoadingSubtitle = "by ericknick",
+	ShowText = "Rayfield", -- for mobile users to unhide rayfield, change if you'd like
+	Theme = "Default", -- Check https://docs.sirius.menu/rayfield/configuration/themes
 
-local PlacedBoxes = tycoon:FindFirstChild("PlacedBoxes") or tycoon:FindFirstChild("PlacedBox")
-if not PlacedBoxes then return end
+	ToggleUIKeybind = "K", -- The keybind to toggle the UI visibility (string like "K" or Enum.KeyCode)
 
-local playerGui = player:WaitForChild("PlayerGui")
+	DisableRayfieldPrompts = false,
+	DisableBuildWarnings = false, -- Prevents Rayfield from warning when the script has a version mismatch with the interface
 
-local screenGui = Instance.new("ScreenGui")
-screenGui.Name = "TeleportUI"
-screenGui.ResetOnSpawn = false
-screenGui.Parent = playerGui
+	ConfigurationSaving = {
+		Enabled = false,
+		FolderName = nil, -- Create a custom folder for your hub/game
+		FileName = "Big Hub"
+	},
 
-local button = Instance.new("TextButton")
-button.Size = UDim2.new(0, 220, 0, 80)
-button.Position = UDim2.new(0.5, -110, 0.8, 0)
-button.Text = "Teleportar Caixas"
-button.BackgroundColor3 = Color3.fromRGB(30, 150, 255)
-button.TextColor3 = Color3.new(1, 1, 1)
-button.TextScaled = true
-button.Parent = screenGui
+	Discord = {
+		Enabled = false, -- Prompt the user to join your Discord server if their executor supports it
+		Invite = "noinvitelink", -- The Discord invite code, do not include discord.gg/. E.g. discord.gg/ ABCD would be ABCD
+		RememberJoins = true -- Set this to false to make them join the discord every time they load it up
+	},
 
-local corner = Instance.new("UICorner")
-corner.CornerRadius = UDim.new(0, 12)
-corner.Parent = button
+	KeySystem = false, -- Set this to true to use our key system
+	KeySettings = {
+		Title = "Untitled",
+		Subtitle = "Key System",
+		Note = "No method of obtaining the key is provided", -- Use this to tell the user how to get a key
+		FileName = "Key", -- It is recommended to use something unique as other scripts using Rayfield may overwrite your key file
+		SaveKey = true, -- The user's key will be saved, but if you change the key, they will be unable to use your script
+		GrabKeyFromSite = false, -- If this is true, set Key below to the RAW site you would like Rayfield to get the key from
+		Key = {"Hello"} -- List of keys that will be accepted by the system, can be RAW file links (pastebin, github etc) or simple strings ("hello","key22")
+	}
+})
 
-local function Teleportar()
-    local char = player.Character or player.CharacterAdded:Wait()
-    local hrp = char:WaitForChild("HumanoidRootPart")
-    for _, obj in ipairs(PlacedBoxes:GetChildren()) do
-        if obj:IsA("Model") then
-            if not obj.PrimaryPart then
-                local p = obj:FindFirstChildWhichIsA("BasePart")
-                if p then obj.PrimaryPart = p end
-            end
-            if obj.PrimaryPart then
-                obj:SetPrimaryPartCFrame(hrp.CFrame * CFrame.new(0, 3, -4))
-            end
-        end
-    end
-end
+local Tab = Window:CreateTab("Main", 4483362458) -- Title, Image
 
-UIS.InputBegan:Connect(function(input, gp)
-    if gp then return end
-    if input.KeyCode == Enum.KeyCode.E then
-        Teleportar()
-    end
-end)
+local Toggle = Tab:CreateToggle({
+	Name = "Auto Farm (Hammer)",
+	CurrentValue = false,
+	Flag = "Toggle1", -- A flag is the identifier for the configuration file, make sure every element has a different flag if you're using configuration saving to ensure no overlaps
+	Callback = function(AutoFarm)
+		-- The function that takes place when the toggle is pressed
+		-- The variable (Value) is a boolean on whether the toggle is true or false
+		local AutoFarm = true
+		for _, model in ipairs(PlacedBoxes:GetChildren()) do
+			if model:IsA("Model") and not model.PrimaryPart then
 
-button.MouseButton1Click:Connect(function()
-    Teleportar()
-end)
+				local part = model:FindFirstChildWhichIsA("BasePart")
+
+				if part then
+					model.PrimaryPart = part
+					print("PrimaryPart definido para:", model.Name)
+				else
+					warn("Nenhuma peça encontrada dentro de " .. model.Name)
+				end
+			end
+
+			local char = player.Character or player.CharacterAdded:Wait()
+			local hrp = char:WaitForChild("HumanoidRootPart")
+
+			for _, model in ipairs(PlacedBoxes:GetChildren()) do
+				if model.PrimaryPart then
+					model:SetPrimaryPartCFrame(hrp.CFrame * CFrame.new(0, 3, -3))
+				else
+					warn(model.Name .. " não tem PrimaryPart!")
+				end
+			end
+
+		end
+
+	end,
+})
