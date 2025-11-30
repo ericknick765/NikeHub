@@ -45,10 +45,7 @@ local Toggle = Tab:CreateToggle({
 	CurrentValue = false,
 	Flag = "Toggle1", -- A flag is the identifier for the configuration file, make sure every element has a different flag if you're using configuration saving to ensure no overlaps
 	Callback = function(AutoFarm)
-		-- The function that takes place when the toggle is pressed
-		-- The variable (Value) is a boolean on whether the toggle is true or false
 		local AutoFarm = true
-		
 		local UIS = game:GetService("UserInputService")
 		local player = game.Players.LocalPlayer
 		local base = workspace.Maps:WaitForChild(player.Name .. "Tycoon")
@@ -98,8 +95,7 @@ local Toggle = Tab:CreateToggle({
 				end
 			end)
 
-			task.wait(5)
+			task.wait(2)
 		end
-
 	end,
 })
