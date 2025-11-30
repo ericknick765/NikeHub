@@ -1,30 +1,55 @@
+-- MAIN SCRIPT COMPATÍVEL COM MOBILE + PC + EXECUTOR
 local Players = game:GetService("Players")
 local UIS = game:GetService("UserInputService")
 local player = Players.LocalPlayer
 
--- Garantir que o PlayerGui existe
+local function WaitForTycoon()
+    local maps = workspace:WaitForChild("Maps")
+
+    for _, model in ipairs(maps:GetChildren()) do
+        if model:IsA("Model") then
+            local owner = model:FindFirstChild("TycoonOwner")
+            if owner and owner:IsA("StringValue") then
+                if owner.Value == player.Name then
+                    return model
+                end
+            end
+        end
+    end
+
+    return nil
+end
+
+-- 🔍 encontra o Tycoon
+local tycoon = WaitForTycoon()
+if not tycoon then
+    warn("Nenhum tycoon encontrado para:", player.Name)
+    return
+end
+
+-- 🗂 pega PlacedBox ou PlacedBoxes automaticamente
+local PlacedBox = tycoon:FindFirstChild("PlacedBox") or tycoon:FindFirstChild("PlacedBoxes")
+
+if not PlacedBox then
+    warn("O Tycoon do jogador não possui PlacedBox ou PlacedBoxes!")
+    return
+end
+
+----------------------------------------------------------
+-- GUI MOBILE / PC
+----------------------------------------------------------
+
 local playerGui = player:WaitForChild("PlayerGui")
 
--- Criar ScreenGui se não existir
-local screenGui = playerGui:FindFirstChild("MobileUI")
-if not screenGui then
-    screenGui = Instance.new("ScreenGui")
-    screenGui.Name = "MobileUI"
-    screenGui.ResetOnSpawn = false
-    screenGui.Parent = playerGui
-end
+local screenGui = Instance.new("ScreenGui")
+screenGui.Name = "TeleportUI"
+screenGui.ResetOnSpawn = false
+screenGui.Parent = playerGui
 
--- Criar o botão APENAS NO CELULAR
-if UIS.TouchEnabled then
-    local btn = Instance.new("TextButton")
-    btn.Size = UDim2.new(0, 200, 0, 70)
-    btn.Position = UDim2.new(0.5, -100, 0.8, 0)
-    btn.Text = "Rodar"
-    btn.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
-    btn.TextColor3 = Color3.fromRGB(255, 255, 255)
-    btn.Parent = screenGui
-
-    btn.MouseButton1Click:Connect(function()
-        print("BOTÃO MOBILE FUNCIONANDO!")
-    end)
-end
+local button = Instance.new("TextButton")
+button.Size = UDim2.new(0, 220, 0, 80)
+button.Position = UDim2.new(0.5, -110, 0.8, 0)
+button.Text = "Teleportar Caixas"
+button.BackgroundColor3 = Color3.fromRGB(30, 150, 255)
+button.TextColor3 = Color3.new(1, 1, 1)
+button.TextScaled = true
