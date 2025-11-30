@@ -100,25 +100,21 @@ local Toggle = Tab:CreateToggle({
 						end
 					end
 				end)
+				local char = player.Character or player.CharacterAdded:Wait()
+				local hrp = char:WaitForChild("HumanoidRootPart")
+				local offset = 0
 
-				while true do
-					local char = player.Character or player.CharacterAdded:Wait()
-					local hrp = char:WaitForChild("HumanoidRootPart")
-					local offset = 0
+				processarModelos(function(model)
+					if model.PrimaryPart then
+						model:SetPrimaryPartCFrame(hrp.CFrame * CFrame.new(0, 0, -2 - offset))
+						offset = offset + 5
+					else
+						warn(model.Name .. " não tem PrimaryPart!")
+					end
+				end)
 
-					processarModelos(function(model)
-						if model.PrimaryPart then
-							model:SetPrimaryPartCFrame(hrp.CFrame * CFrame.new(0, 0, -2 - offset))
-							offset = offset + 5
-						else
-							warn(model.Name .. " não tem PrimaryPart!")
-						end
-					end)
-
-					task.wait(2)
-				end
+				task.wait(2)
+			end
 		end
-
-		
 	end
 })
