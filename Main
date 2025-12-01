@@ -112,6 +112,6 @@ while true do
 	else
 		AutoClikerLegit:FindFirstChild("AutoSlash").Value = false
 	end
-	local args = { player }
+	local args = {player}
 	game:GetService("ReplicatedStorage"):WaitForChild("Remotes"):WaitForChild("SlashEvent"):FireServer(unpack(args))
 end
