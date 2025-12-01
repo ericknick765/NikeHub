@@ -88,14 +88,16 @@ while true do
             end
         end)
     end
-		--AutoCliker Do Jogo
+--AutoCliker Do Jogo
 	local player = game.Players.LocalPlayer
-	local AutoClikerLegit = player:WaitForChild("PlayerData", 3)
-	if AutoClikerLegit and AutoFarm == true then
-		AutoClikerLegit:FindFirstChild("AutoSlash").Value = true
-	else
-		AutoClikerLegit:FindFirstChild("AutoSlash").Value = false
-	end
+local AutoClikerLegit = player:WaitForChild("PlayerData", 3)
+
+if AutoClikerLegit and AutoFarm == true then
+	AutoClikerLegit:FindFirstChild("AutoSlash").Value = true
+else
+	AutoClikerLegit:FindFirstChild("AutoSlash").Value = false
+end
+
 	--AutoCliker RemoteEvent
     local args = { player }
     game:GetService("ReplicatedStorage"):WaitForChild("Remotes"):WaitForChild("SlashEvent"):FireServer(unpack(args))
