@@ -91,7 +91,7 @@ while true do
 		--AutoCliker Do Jogo
 	local player = game.Players.LocalPlayer
 	local AutoClikerLegit = player:WaitForChild("PlayerData", 3)
-	if AutoClikerLegit and AutoFarm = true then
+	if AutoClikerLegit and AutoFarm == true then
 		AutoClikerLegit:FindFirstChild("AutoSlash").Value = true
 	else
 		AutoClikerLegit:FindFirstChild("AutoSlash").Value = false
