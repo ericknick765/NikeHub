@@ -3,15 +3,16 @@ local Rayfield = loadstring(game:HttpGet('https://sirius.menu/rayfield'))()
 local player = game.Players.LocalPlayer
 local base = workspace.Maps:WaitForChild(player.Name .. "Tycoon")
 local PlacedBoxes = base:WaitForChild("PlacedBoxes")
-
-local AutoFarm = false  -- <-- NECESSÁRIO
+local Fling = workspace.FlingModels
+local DeleteMob = false
+local AutoFarm = false
 
 local Window = Rayfield:CreateWindow({
 	Name = "NikeHub",
 	Icon = 0,
-	LoadingTitle = "Script Simples Com AutoFarm e Desbloquia Loja..",
+	LoadingTitle = "Script Simples Com AutoFarm",
 	LoadingSubtitle = "by ericknick",
-	ShowText = "Rayfield",
+	ShowText = "Nike Hub",
 	Theme = "Default",
 	ToggleUIKeybind = "K",
 
@@ -31,7 +32,9 @@ local Button = Tab:CreateButton({
 		if Leaderstats then
 			local Rebirth = Leaderstats:WaitForChild("Rebirth", 5)
 			if Rebirth then
-				Rebirth.Value = 100
+				Rebirth.Value += 100
+				task.wait(20)
+				Rebirth.Value -= 100
 			end
 		end
 	end,
@@ -46,9 +49,22 @@ local Toggle = Tab:CreateToggle({
     end,
 })
 
+local Toggle1 = Tab:CreateToggle({
+    Name = "Ant lag (Delete Mobs)",
+    CurrentValue = false,
+    Flag = "DeleteMob",
+    Callback = function(Value)
+        DeleteMob = Value
+    end,
+})
+
 while true do
     task.wait(0.1)
-
+	if DeleteMob then
+		for _, obj in ipairs(Fling:GetChildren()) do
+			obj:Destroy()
+		end
+	end
     if AutoFarm then
 
         local function processarModelos(func)
@@ -88,17 +104,14 @@ while true do
             end
         end)
     end
---AutoCliker Do Jogo
 	local player = game.Players.LocalPlayer
-local AutoClikerLegit = player:WaitForChild("PlayerData", 3)
+	local AutoClikerLegit = player:WaitForChild("PlayerData", 3)
 
-if AutoClikerLegit and AutoFarm == true then
-	AutoClikerLegit:FindFirstChild("AutoSlash").Value = true
-else
-	AutoClikerLegit:FindFirstChild("AutoSlash").Value = false
-end
-
-	--AutoCliker RemoteEvent
-    local args = { player }
-    game:GetService("ReplicatedStorage"):WaitForChild("Remotes"):WaitForChild("SlashEvent"):FireServer(unpack(args))
+	if AutoClikerLegit and AutoFarm == true then
+		AutoClikerLegit:FindFirstChild("AutoSlash").Value = true
+	else
+		AutoClikerLegit:FindFirstChild("AutoSlash").Value = false
+	end
+	local args = { player }
+	game:GetService("ReplicatedStorage"):WaitForChild("Remotes"):WaitForChild("SlashEvent"):FireServer(unpack(args))
 end
