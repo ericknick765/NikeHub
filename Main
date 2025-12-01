@@ -68,6 +68,9 @@ local Toggle = Tab:CreateToggle({
 		local PlacedBoxes = base:WaitForChild("PlacedBoxes")
 		local AutoFarm = true
 		Toggle:Set(false)
+		Toggle:OnChanged(function(value)
+  	 	AutoFarm = value
+		end)
 
 		while true do
 			task.wait(0.1)
