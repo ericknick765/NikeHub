@@ -37,7 +37,6 @@ local Button = Tab:CreateButton({
 	end,
 })
 
--- NOVO RAYFIELD V4 TOGGLE ✔
 local Toggle = Tab:CreateToggle({
     Name = "AutoFarm (Hammer)",
     CurrentValue = false,
@@ -47,7 +46,6 @@ local Toggle = Tab:CreateToggle({
     end,
 })
 
--- LOOP
 while true do
     task.wait(0.1)
 
@@ -90,7 +88,14 @@ while true do
             end
         end)
     end
+	--AutoCliker Do Jogo
+	local player = game.Players.LocalPlayer
+	local AutoClikerLegit = player:WaitForChild("PlayerData", 3)
 
+	if AutoClikerLegit then
+		AutoClikerlegit:FindFirstChild("AutoSlash").Value = True
+	end
+	--AutoCliker RemoteEvent
     local args = { player }
     game:GetService("ReplicatedStorage"):WaitForChild("Remotes"):WaitForChild("SlashEvent"):FireServer(unpack(args))
 end
