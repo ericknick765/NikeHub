@@ -105,7 +105,6 @@ local Toggle = Tab:CreateToggle({
 				local char = player.Character or player.CharacterAdded:Wait()
 				local hrp = char:WaitForChild("HumanoidRootPart")
 				local offset = 0
-				Toggle:Set(false)		
 				processarModelos(function(model)
 					if model.PrimaryPart then
 						model:SetPrimaryPartCFrame(hrp.CFrame * CFrame.new(0, -2, -2 - offset))
