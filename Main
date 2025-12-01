@@ -58,66 +58,61 @@ local Button = Tab:CreateButton({
 })
 
 local Toggle = Tab:CreateToggle({
-	Name = "Auto Farm (Hammer)",
-	CurrentValue = false,
-	Flag = "Toggle1", -- A flag is the identifier for the configuration file, make sure every element has a different flag if you're using configuration saving to ensure no overlaps
-	Callback = function(AutoFarm)
-		local UIS = game:GetService("UserInputService")
-		local player = game.Players.LocalPlayer
-		local base = workspace.Maps:WaitForChild(player.Name .. "Tycoon")
-		local PlacedBoxes = base:WaitForChild("PlacedBoxes")
-		local AutoFarm = true
-
-		while true do
-			task.wait(0.1)
-
-			if AutoFarm then
-				local function processarModelos(func)
-					local checked = {}
-					local nextModel = PlacedBoxes:FindFirstChildWhichIsA("Model")
-					while nextModel do
-						if not checked[nextModel] then
-							checked[nextModel] = true
-							func(nextModel)
-						end
-						nextModel = nil
-						for _, child in ipairs(PlacedBoxes:GetChildren()) do
-							if child:IsA("Model") and not checked[child] then
-								nextModel = child
-								break
-							end
-						end			
-					end
-				end
-
-				processarModelos(function(model)
-					if not model.PrimaryPart then
-						local part = model:FindFirstChildWhichIsA("BasePart")
-						if part then
-							model.PrimaryPart = part
-							print("PrimaryPart definido para:", model.Name)
-						else
-							warn("Nenhuma peça encontrada dentro de " .. model.Name)
-						end
-					end
-				end)
-
-				local char = player.Character or player.CharacterAdded:Wait()
-				local hrp = char:WaitForChild("HumanoidRootPart")
-				local offset = 0
-				processarModelos(function(model)
-					if model.PrimaryPart then
-						model:SetPrimaryPartCFrame(hrp.CFrame * CFrame.new(0, -2, -2 - offset))
-					else
-						warn(model.Name .. " não tem PrimaryPart!")
-					end
-				end)
-			end
-			
-			local args = { game:GetService("Players"):WaitForChild(player.Name) }
-			game:GetService("ReplicatedStorage"):WaitForChild("Remotes"):WaitForChild("SlashEvent"):FireServer(unpack(args))
-			
-		end
-
-	end
+    Name = "AutoFarm(Hammer)",
+    CurrentValue = false,
+    Flag = "AutoFarmToggle",
+    Callback = function(Value)
+        AutoFarm = Value
+    end,
 })
+
+while true do
+    task.wait(0.1)
+
+    if AutoFarm then
+
+        local function processarModelos(func)
+            local checked = {}
+            local nextModel = PlacedBoxes:FindFirstChildWhichIsA("Model")
+            while nextModel do
+                if not checked[nextModel] then
+                    checked[nextModel] = true
+                    func(nextModel)
+                end
+                nextModel = nil
+                for _, child in ipairs(PlacedBoxes:GetChildren()) do
+                    if child:IsA("Model") and not checked[child] then
+                        nextModel = child
+                        break
+                    end
+                end
+            end
+        end
+
+        processarModelos(function(model)
+            if not model.PrimaryPart then
+                local part = model:FindFirstChildWhichIsA("BasePart")
+                if part then
+                    model.PrimaryPart = part
+                else
+                    warn("Nenhuma peça encontrada dentro de " .. model.Name)
+                end
+            end
+        end)
+
+        local char = player.Character or player.CharacterAdded:Wait()
+        local hrp = char:WaitForChild("HumanoidRootPart")
+
+        processarModelos(function(model)
+            if model.PrimaryPart then
+                model:SetPrimaryPartCFrame(hrp.CFrame * CFrame.new(0, -2, -2))
+            else
+                warn(model.Name .. " não tem PrimaryPart!")
+            end
+        end)
+    end
+
+    local args = { player }
+    game:GetService("ReplicatedStorage"):WaitForChild("Remotes"):WaitForChild("SlashEvent"):FireServer(unpack(args))
+end
+
