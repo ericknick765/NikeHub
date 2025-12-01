@@ -67,10 +67,6 @@ local Toggle = Tab:CreateToggle({
 		local base = workspace.Maps:WaitForChild(player.Name .. "Tycoon")
 		local PlacedBoxes = base:WaitForChild("PlacedBoxes")
 		local AutoFarm = true
-		Toggle:Set(false)
-		Toggle:OnChanged(function(value)
-  	 	AutoFarm = value
-		end)
 
 		while true do
 			task.wait(0.1)
@@ -90,7 +86,7 @@ local Toggle = Tab:CreateToggle({
 								nextModel = child
 								break
 							end
-						end
+						end			
 					end
 				end
 
@@ -109,7 +105,7 @@ local Toggle = Tab:CreateToggle({
 				local char = player.Character or player.CharacterAdded:Wait()
 				local hrp = char:WaitForChild("HumanoidRootPart")
 				local offset = 0
-
+				Toggle:Set(false)		
 				processarModelos(function(model)
 					if model.PrimaryPart then
 						model:SetPrimaryPartCFrame(hrp.CFrame * CFrame.new(0, -2, -2 - offset))
