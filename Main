@@ -58,7 +58,7 @@ local Button = Tab:CreateButton({
 })
 
 local Toggle = Tab:CreateToggle({
-    Name = "AutoFarm(Hammer)",
+    Name = "AutoFarm (Hammer)",
     CurrentValue = false,
     Flag = "AutoFarmToggle",
     Callback = function(Value)
@@ -68,7 +68,6 @@ local Toggle = Tab:CreateToggle({
 
 while true do
     task.wait(0.1)
-
     if AutoFarm then
 
         local function processarModelos(func)
