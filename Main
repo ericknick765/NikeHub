@@ -88,12 +88,11 @@ while true do
             end
         end)
     end
-	--AutoCliker Do Jogo
+		--AutoCliker Do Jogo
 	local player = game.Players.LocalPlayer
 	local AutoClikerLegit = player:WaitForChild("PlayerData", 3)
-
 	if AutoClikerLegit then
-		AutoClikerlegit:WaitForChild("AutoSlash" 1).Value = True
+		AutoClikerLegit:FindFirstChild("AutoSlash").Value = true
 	end
 	--AutoCliker RemoteEvent
     local args = { player }
