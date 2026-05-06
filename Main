@@ -1,4 +1,4 @@
-local pasta = workspace.Debris
+local module = {}
 
 local valoresBase = {
     ["Espresso Signora"] = 27500,
@@ -9,7 +9,7 @@ local valoresBase = {
     ["Trulimero Trulicina"] = 160,
     ["Trippi Troppi"] = 7,
     ["Tripi Tropi Tropa Tripa"] = 56000,
-    ["Tralalero Tralala"] = 0,
+    ["Tralalero Tralala"] = 17500,
     ["Tim Cheese"] = 3,
     ["Talpa Di Fero"] = 4,
     ["Ta Ta Ta Ta Sahur"] = 18,
@@ -27,7 +27,7 @@ local valoresBase = {
     ["Octopusini Bluberini"] = 2100,
     ["Noobini Pizzanini"] = 2,
     ["Meowl"] = 275000,
-    ["Matteo"] = 0,
+    ["Matteo"] = 25000,
     ["Lirili Larila"] = 3,
     ["La Vacca Saturno Saturnita"] = 0,
     ["Karkerkar Kurkur"] = 120000,
@@ -38,7 +38,7 @@ local valoresBase = {
     ["Fruli Frula"] = 7,
     ["Frigo Camelo"] = 2600,
     ["Agarrini La Palini"] = 0,
-    ["Alessio"] = 0,
+    ["Alessio"] = 27500,
     ["Ballerina Cappuccina"] = 19,
     ["Bambini Crostini"] = 160,
     ["Bananita Dolphinita"] = 210,
@@ -58,12 +58,12 @@ local valoresBase = {
     ["Waterdino"] = 50,
     ["Tuff Toucan"] = 5300,
     ["Tralalerita Tralala"] = 0,
-    ["Torrtuginni Dragonfrutini"] = 0,
+    ["Torrtuginni Dragonfrutini"] = 32000,
     ["Tictac Sahur"] = 76000,
-    ["Stoppo Luminino"] = 0,
+    ["Stoppo Luminino"] = 30000,
     ["SWAG SODA"] = 0,
     ["Rinooccio Verdini"] = 880,
-    ["Rexosaurus"] = 0,
+    ["Rexosaurus"] = 22500,
     ["Plan Red"] = 130,
     ["Plan Blue"] = 140,
     ["Pesto Mortioni"] = 52,
@@ -73,14 +73,14 @@ local valoresBase = {
     ["Nuclearo Dinossauro"] = 190000,
     ["Mangolini Parrocini"] = 0,
     ["Madung"] = 44,
-    ["Los Primos Blue"] = 0,
-    ["John Pork"] = 0,
+    ["Los Primos Blue"] = 44500,
+    ["John Pork"] = 72,
     ["Guest666"] = 7000,
     ["Gattatino Nyanino"] = 76,
     ["Bangello"] = 725,
     ["Fryuro"] = 0,
     ["Elefanto Frigo"] = 775,
-    ["Dipperi Chiperini"] = 0,
+    ["Dipperi Chiperini"] = 20,
     ["Crazylone Pizaione"] = 225000,
     ["Corn Sahur"] = 225000,
     ["Compactoroni Diskaloni"] = 135000,
@@ -92,7 +92,7 @@ local valoresBase = {
     ["Cacto Hipopotamo"] = 0,
     ["Burguro"] = 0,
     ["Blackhole Goat"] = 125000,
-    ["1x1x1x1"] = 0,
+    ["1x1x1x1"] = 23000,
     ["Garamararam"] = 40,
     ["Ketupat Kepat"] = 1000000,
     ["Mastodontico Telepiedone"] = 0,
@@ -104,7 +104,6 @@ local valoresBase = {
     ["Chicleteira Bicicleteira"] = 0,
     ["Guerriro Digitale"] = 0,
     ["Dragonfrutina Dolphinita"] = 475000,
-    ["Esok Sekolah"] = 0,
     ["Ketchuru Matsuru"] = 0,
     ["Castlino Fortini"] = 0,
     ["Bambu Sahur"] = 0,
@@ -113,7 +112,6 @@ local valoresBase = {
     ["Los Nooo My Hotspotsitos"] = 0,
 }
 
--- multiplicadores
 local mutacoes = {
     ["Gold"] = 1.5,
     ["Diamond"] = 2,
@@ -125,41 +123,44 @@ local mutacoes = {
     ["Rainbow"] = 30
 }
 
-for _, obj in ipairs(pasta:GetChildren()) do
-	if obj:IsA("Model") then
-		
-		local mutacaoNome = obj:GetAttribute("Mutation")
-		if mutacaoNome then
-			
-			local nome = obj.Name
-			
-			-- procura base por nome parcial
-			local base
-			for key, value in pairs(valoresBase) do
-				if string.find(nome, key) then
-					base = value
-					break
-				end
-			end
-			
-			-- procura mutação por nome parcial
-			local mult = 1
-			for key, value in pairs(mutacoes) do
-				if string.find(mutacaoNome, key) then
-					mult = value
-					break
-				end
-			end
-			
-			if base then
-				local valorFinal = base * mult
-				
-				print("Personagem:", nome)
-				print("Mutação:", mutacaoNome)
-				print("Valor final:", valorFinal)
-			else
-				warn("Sem base:", nome)
-			end
-		end
-	end
+function module.getValue(obj)
+    if not obj or not obj:IsA("Model") then return nil end
+
+    local mutacaoNome = obj:GetAttribute("Mutation")
+    if not mutacaoNome then return nil end
+
+    local nome = obj.Name
+
+    local base
+    for key, value in pairs(valoresBase) do
+        if string.find(nome, key) then
+            base = value
+            break
+        end
+    end
+
+    local mult = 1
+    for key, value in pairs(mutacoes) do
+        if string.find(mutacaoNome, key) then
+            mult = value
+            break
+        end
+    end
+
+    if base then
+        return base * mult
+    end
+
+    return nil
 end
+
+function module.scan(folder)
+    for _, obj in ipairs(folder:GetChildren()) do
+        local value = module.getValue(obj)
+        if value then
+            print(obj.Name, value)
+        end
+    end
+end
+
+return module
