@@ -148,19 +148,32 @@ function module.getValue(obj)
     end
 
     if base then
-        return base * mult
+        local valorFinal = base * mult
+        
+        -- Se o valor final for 0, transforma em 1 para não bugar
+        if valorFinal == 0 then
+            valorFinal = 1
+        end
+        
+        return valorFinal
     end
 
     return nil
 end
 
 function module.scan(folder)
+    local valorTotal = 0 -- Variável para armazenar a soma de tudo
+
     for _, obj in ipairs(folder:GetChildren()) do
         local value = module.getValue(obj)
         if value then
-            print(obj.Name, value)
+            valorTotal = valorTotal + value
+            -- print(obj.Name, value) -- Descomente se quiser ver cada item no console
         end
     end
+    
+    -- Retorna o valor total para o script que chamou
+    return valorTotal
 end
 
 return module
