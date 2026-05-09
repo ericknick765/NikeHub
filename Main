@@ -118,10 +118,15 @@ local mutacoes = {
     ["Plasma"] = 4,
     ["Molten"] = 6,
     ["Radioactive"] = 8,
+    ["Void"] = 10,
     ["Virus"] = 10,
     ["Shadow"] = 12,
+    ["Enchanted"] = 12,
     ["Eletrified"] = 16,
-    ["Rainbow"] = 30
+    ["Wet"] = 16,
+    ["Alien"] = 22,
+    ["Rainbow"] = 30,
+    ["Bacon"] = 30  
 }
 
 function module.getValue(obj)
