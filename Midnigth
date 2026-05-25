@@ -13,7 +13,9 @@ local Waiting = false
 local AutoStart = false
 local LastDetect = {}
 local TargetPlayer
-local WaitPlayer 
+local WaitPlayer
+local CurrentRace
+local RaceConnection
 
 -- Hook
 local mt = getrawmetatable(game)
@@ -44,6 +46,26 @@ mt.__namecall = newcclosure(function(self, ...)
                 Remote = self,
                 Args = args
             })
+    
+            for _, arg in ipairs(args) do
+    
+               if typeof(arg) == "string" then
+        
+                    if workspace:FindFirstChild("Races") then
+            
+                        local race = workspace.Races:FindFirstChild(arg)
+
+                        if race then
+                
+                            CurrentRace = race.Name
+
+                            print("Corrida detectada:", CurrentRace)
+
+                            SetupRaceDetector()
+                        end
+                    end
+                end
+            end
 
             print("\n======= REMOTE "..#SavedRemotes.." SALVO =======")
             print("Nome:", self.Name)
@@ -76,29 +98,112 @@ mt.__namecall = newcclosure(function(self, ...)
 end)
 
 local function MainStart()
-       task.wait(WaitPlayer)
-        if #SavedRemotes >= 2 then
-                    
-                    print("Executando remotes...")
 
-                    for i, data in ipairs(SavedRemotes) do
+    task.wait(WaitPlayer or 0)
+
+    if #SavedRemotes < 2 then
+        
+        library:Notify(
+            "Configure os remotes primeiro!",
+            4
+        )
+
+        return
+    end
+
+    print("Executando remotes...")
+
+    for i, data in ipairs(SavedRemotes) do
+        
+        local newArgs = table.clone(data.Args)
+
+        -- Atualiza corridas automaticamente
+        for index, arg in ipairs(newArgs) do
+            
+            if typeof(arg) == "string" then
+                
+                local raceFolder = workspace:FindFirstChild("Races")
+
+                if raceFolder then
+                    
+                    local race = raceFolder:FindFirstChild(arg)
+
+                    if race then
                         
-                        pcall(function()
-                            data.Remote:FireServer(unpack(data.Args))
-                        end)
+                        local RaceStage = race:GetAttribute("PlayersStr")
 
-                        print("Remote "..i.." executado")
-
-                        task.wait(1)
+                        if RaceStage then
+                            
+                            print("Atualizando corrida:", arg)
+                            
+                            newArgs[index] = RaceStage
+                        else
+                            
+                            newArgs[index] = race.Name
+                        end
                     end
-                else
-                    
-                    library:Notify(
-                        "Configure os remotes primeiro!",
-                        4
-                    )
                 end
-          task.wait(15)
+            end
+        end
+
+        pcall(function()
+            data.Remote:FireServer(unpack(newArgs))
+        end)
+
+        print("Remote "..i.." executado")
+
+        task.wait(1)
+    end
+
+    task.wait(15)
+end
+
+local function SetupRaceDetector()
+
+    if RaceConnection then
+        RaceConnection:Disconnect()
+    end
+
+    if not CurrentRace then
+        return
+    end
+
+    local race = workspace.Races:FindFirstChild(CurrentRace)
+
+    if not race then
+        
+        library:Notify(
+            "Corrida não encontrada!",
+            4
+        )
+
+        return
+    end
+
+    library:Notify(
+        "Monitorando "..CurrentRace,
+        4
+    )
+
+    RaceConnection = race:GetAttributeChangedSignal("PlayersStr"):Connect(function()
+
+        local state = race:GetAttribute("PlayersStr")
+
+        print(CurrentRace, state)
+
+        if tostring(state):find("Finished") then
+            
+            library:Notify(
+                CurrentRace.." terminou!",
+                3
+            )
+
+            if AutoStart then
+                
+                MainStart()
+            end
+        end
+    end)
 end
 
 local function PlayerDetected(player)
