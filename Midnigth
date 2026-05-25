@@ -19,73 +19,70 @@ local RaceConnection
 local MainStart
 
 -- =========================
--- DETECTOR DE CORRIDA
+-- DETECTOR DE CORRIDA (CORRIGIDO & OTIMIZADO)
 -- =========================
 
 local function SetupRaceDetector()
-
+    -- Cancela conexões antigas para evitar duplicação de loops
     if RaceConnection then
         task.cancel(RaceConnection)
+        RaceConnection = nil
     end
 
     if not CurrentRace then
-        warn("Nenhuma corrida selecionada")
+        warn("Nenhuma corrida selecionada para monitoramento.")
         return
     end
 
-    local race = workspace.Races:FindFirstChild(CurrentRace)
-
-    if not race then
-        warn("Corrida não encontrada:", CurrentRace)
-        return
-    end
-
-    library:Notify(
-        "Monitorando "..CurrentRace,
-        4
-    )
-
-    print("Monitorando:", CurrentRace)
+    library:Notify("Monitorando " .. CurrentRace, 4)
+    print("Iniciando monitoramento dinâmico de:", CurrentRace)
 
     RaceConnection = task.spawn(function()
-
         local Finished = false
 
-        while task.wait(0.2) do
+        while true do
+            task.wait(0.3) -- Intervalo otimizado para não dar lag e não perder o timing
 
             if not AutoStart then
                 continue
             end
 
-            if not race or not race.Parent then
-                break
+            -- BUSCA DINÂMICA: Procura a corrida do zero a cada ciclo.
+            -- Se ela for deletada e recriada pelo jogo, o script não quebra!
+            local racesFolder = workspace:FindFirstChild("Races")
+            local race = racesFolder and racesFolder:FindFirstChild(CurrentRace)
+
+            if not race then
+                -- Se a corrida sumiu do mapa (rodada resetando), reseta o estado e aguarda ela voltar
+                if Finished then
+                    Finished = false
+                end
+                continue
             end
 
             local state = race:GetAttribute("PlayersStr")
 
-            print("Estado:", state)
+            -- Verifica se o atributo existe e se contém a frase (independente de maiúsculas/minúsculas)
+            if typeof(state) == "string" then
+                local stateLower = string.lower(state)
+                local isFinishing = string.find(stateLower, "finishing race")
 
-            -- Verifica se 'state' é uma string e se CONTÉM "Finishing race"
-            local isFinishing = type(state) == "string" and string.find(state, "Finishing race")
+                if isFinishing then
+                    if not Finished then
+                        Finished = true
+                        print("检测 [FINALIZOU] - Atributo:", state)
 
-            if isFinishing and not Finished then
-                
-                Finished = true
-
-                print("FINALIZOU")
-
-                library:Notify(
-                    CurrentRace.." terminou!",
-                    3
-                )
-
-                task.wait(1)
-
-                MainStart()
-            end
-
-            -- Se não achou a string, reseta o Finished
-            if not isFinishing then
+                        library:Notify(CurrentRace .. " terminou!", 3)
+                        
+                        task.wait(1) -- Pequena folga antes de reiniciar
+                        MainStart()
+                    end
+                else
+                    -- Se o texto mudou para qualquer outra coisa, libera para a próxima detecção
+                    Finished = false
+                end
+            else
+                -- Se o atributo for nil ou não for string, reseta o gatilho
                 Finished = false
             end
         end
@@ -102,16 +99,13 @@ local old = mt.__namecall
 setreadonly(mt, false)
 
 mt.__namecall = newcclosure(function(self, ...)
-
     local args = {...}
     local method = getnamecallmethod()
 
     if method == "FireServer" and Waiting then
-
         local alreadySaved = false
 
         for _, data in ipairs(SavedRemotes) do
-            
             if data.Remote == self then
                 alreadySaved = true
                 break
@@ -119,67 +113,38 @@ mt.__namecall = newcclosure(function(self, ...)
         end
 
         if not alreadySaved then
-
-            local foundRace = false
-
             table.insert(SavedRemotes, {
                 Remote = self,
                 Args = args
             })
 
-            -- Detecta corrida automaticamente
+            -- Detecta corrida automaticamente pelos argumentos do Remote
             for _, arg in ipairs(args) do
-
-                print("ARG:", arg, typeof(arg))
-
                 if typeof(arg) == "string" then
-
                     local racesFolder = workspace:FindFirstChild("Races")
-
-                    if racesFolder then
-
-                        local race = racesFolder:FindFirstChild(arg)
-
-                        if race then
-
-                            foundRace = true
-
-                            CurrentRace = race.Name
-
-                            print("Corrida detectada:", CurrentRace)
-
-                            SetupRaceDetector()
-
-                            break
-                        end
+                    if racesFolder and racesFolder:FindFirstChild(arg) then
+                        CurrentRace = arg
+                        print("Corrida detectada via Remote:", CurrentRace)
+                        SetupRaceDetector()
+                        break
                     end
                 end
             end
 
-            print("\n======= REMOTE "..#SavedRemotes.." SALVO =======")
+            print("\n======= REMOTE " .. #SavedRemotes .. " SALVO =======")
             print("Nome:", self.Name)
             print("Path:", self:GetFullName())
-
             for i, v in ipairs(args) do
                 print("Arg", i, v)
             end
-
             print("================================")
 
-            library:Notify(
-                "Remote "..#SavedRemotes.." salvo!",
-                3
-            )
+            library:Notify("Remote " .. #SavedRemotes .. " salvo!", 3)
         end
 
         if #SavedRemotes >= 2 then
-
             Waiting = false
-
-            library:Notify(
-                "2 remotes configurados!",
-                5
-            )
+            library:Notify("2 remotes configurados com sucesso!", 5)
         end
     end
 
@@ -191,55 +156,37 @@ end)
 -- =========================
 
 MainStart = function()
-
-    task.wait(WaitPlayer or 0)
-
     if #SavedRemotes < 2 then
-        
-        library:Notify(
-            "Configure os remotes primeiro!",
-            4
-        )
-
+        library:Notify("Configure os remotes primeiro!", 4)
         return
     end
 
-    print("Executando remotes...")
+    if WaitPlayer and WaitPlayer > 0 then
+        print("Aguardando tempo configurado do player:", WaitPlayer .. "s")
+        task.wait(WaitPlayer)
+    end
+
+    print("Executando remotes gravados...")
 
     for i, data in ipairs(SavedRemotes) do
-
         local newArgs = table.clone(data.Args)
 
-        -- Atualiza corrida automaticamente
+        -- Garante que o argumento do remote sempre use o nome atualizado da corrida
         for index, arg in ipairs(newArgs) do
-
             if typeof(arg) == "string" then
-
                 local raceFolder = workspace:FindFirstChild("Races")
-
-                if raceFolder then
-
-                    local race = raceFolder:FindFirstChild(arg)
-
-                    if race then
-
-                        print("Atualizando corrida:", arg)
-
-                        newArgs[index] = race.Name
-                    end
+                if raceFolder and raceFolder:FindFirstChild(arg) then
+                    newArgs[index] = arg
                 end
             end
         end
 
         pcall(function()
-
             data.Remote:FireServer(unpack(newArgs))
-
         end)
 
-        print("Remote "..i.." executado")
-
-        task.wait(1)
+        print("Remote " .. i .. " disparado.")
+        task.wait(0.5) -- Delay preventivo entre os remotes para evitar ban/kick por spam
     end
 end
 
@@ -248,29 +195,16 @@ end
 -- =========================
 
 local function PlayerDetected(playerFound)
-
     local currentTime = tick()
 
     if LastDetect[playerFound.Name] then
-
-        local seconds = math.floor(
-            currentTime - LastDetect[playerFound.Name]
-        )
-
-        library:Notify(
-            playerFound.Name.." apareceu novamente após "..seconds.."s",
-            5
-        )
+        local seconds = math.floor(currentTime - LastDetect[playerFound.Name])
+        library:Notify(playerFound.Name .. " apareceu novamente após " .. seconds .. "s", 5)
     else
-
-        library:Notify(
-            playerFound.Name.." entrou no servidor!",
-            5
-        )
+        library:Notify(playerFound.Name .. " entrou no servidor!", 5)
     end
 
     LastDetect[playerFound.Name] = currentTime
-
     MainStart()
 end
 
@@ -288,72 +222,46 @@ end)
 -- =========================
 
 for _, plr in ipairs(Players:GetPlayers()) do
-
     if plr.Name == TargetPlayer then
-        
         PlayerDetected(plr)
     end
 end
 
 Players.PlayerAdded:Connect(function(plr)
-
     if plr.Name == TargetPlayer then
-        
         PlayerDetected(plr)
     end
 end)
 
 -- =========================
--- UI
+-- UI CONFIG
 -- =========================
 
 mainWindow:Toggle("Auto-Start", function(state)
-
     AutoStart = state
-
     if state then
-
-        library:Notify(
-            "Auto-Start ativado!",
-            3
-        )
-
-        MainStart()
-
+        library:Notify("Auto-Start ativado!", 3)
+        -- Se já houver uma corrida ativa definida, reinicia o detector ao ligar a UI
+        if CurrentRace then
+            SetupRaceDetector()
+        end
     else
-
-        library:Notify(
-            "Auto-Start desativado!",
-            3
-        )
+        library:Notify("Auto-Start desativado!", 3)
     end
 end)
 
 mainWindow:Box("Player Finder", "Name", function(BoxPlayer)
-
     TargetPlayer = tostring(BoxPlayer)
-
-    library:Notify(
-        "Agora detectando: "..TargetPlayer,
-        5
-    )
+    library:Notify("Agora detectando: " .. TargetPlayer, 5)
 end)
 
 mainWindow:Box("Wait Load Player", "Time", function(WaitV)
-
     WaitPlayer = tonumber(WaitV)
 end)
 
 mainWindow:Button("configure remotes", function()
-
     table.clear(SavedRemotes)
-
     Waiting = true
-
-    library:Notify(
-        "Esperando 2 remotes...",
-        5
-    )
-
-    print("Faça a corrida manualmente.")
+    library:Notify("Esperando 2 remotes... Entre na corrida manualmente.", 5)
+    print("Modo de captura ativado. Vá até a corrida e inicie-a.")
 end)
