@@ -17,6 +17,60 @@ local WaitPlayer
 local CurrentRace
 local RaceConnection
 
+
+local function SetupRaceDetector()
+
+    if RaceConnection then
+        RaceConnection:Disconnect()
+    end
+
+    if not CurrentRace then
+        return
+    end
+
+    local race = workspace.Races:FindFirstChild(CurrentRace)
+
+    if not race then
+        
+        library:Notify(
+            "Corrida não encontrada!",
+            4
+        )
+
+        return
+    end
+
+    library:Notify(
+        "Monitorando "..CurrentRace,
+        4
+    )
+
+    print("Conectando detector:", race.Name)
+
+    RaceConnection = race:GetAttributeChangedSignal("PlayersStr"):Connect(function()
+
+    print("Evento disparou")
+
+    local state = race:GetAttribute("PlayersStr")
+
+    print(CurrentRace, state)
+
+    if state == "Finishing race" then
+        
+        print("FINALIZOU")
+
+        library:Notify(
+            CurrentRace.." terminou!",
+            3
+        )
+
+        if AutoStart then
+            MainStart()
+        end
+    end
+end)
+end
+
 -- Hook
 local mt = getrawmetatable(game)
 local old = mt.__namecall
@@ -148,58 +202,6 @@ local function MainStart()
 
 end
 
-local function SetupRaceDetector()
-
-    if RaceConnection then
-        RaceConnection:Disconnect()
-    end
-
-    if not CurrentRace then
-        return
-    end
-
-    local race = workspace.Races:FindFirstChild(CurrentRace)
-
-    if not race then
-        
-        library:Notify(
-            "Corrida não encontrada!",
-            4
-        )
-
-        return
-    end
-
-    library:Notify(
-        "Monitorando "..CurrentRace,
-        4
-    )
-
-    print("Conectando detector:", race.Name)
-
-    RaceConnection = race:GetAttributeChangedSignal("PlayersStr"):Connect(function()
-
-    print("Evento disparou")
-
-    local state = race:GetAttribute("PlayersStr")
-
-    print(CurrentRace, state)
-
-    if state == "Finishing race" then
-        
-        print("FINALIZOU")
-
-        library:Notify(
-            CurrentRace.." terminou!",
-            3
-        )
-
-        if AutoStart then
-            MainStart()
-        end
-    end
-end)
-end
 
 local function PlayerDetected(player)
 
