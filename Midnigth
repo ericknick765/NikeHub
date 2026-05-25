@@ -19,7 +19,7 @@ local RaceConnection
 local MainStart
 
 -- =========================
--- DETECTOR DE CORRIDA (CORRIGIDO & OTIMIZADO)
+-- DETECTOR DE CORRIDA (ATUALIZADO COM AUTO-JUMP)
 -- =========================
 
 local function SetupRaceDetector()
@@ -39,24 +39,21 @@ local function SetupRaceDetector()
 
     RaceConnection = task.spawn(function()
         local Finished = false
+        local lastJumpTime = 0 -- Guarda o tempo do último pulo
 
         while true do
-            task.wait(0.3) -- Intervalo otimizado para não dar lag e não perder o timing
+            task.wait(0.3) -- Intervalo para checagem do status
 
             if not AutoStart then
                 continue
             end
 
             -- BUSCA DINÂMICA: Procura a corrida do zero a cada ciclo.
-            -- Se ela for deletada e recriada pelo jogo, o script não quebra!
             local racesFolder = workspace:FindFirstChild("Races")
             local race = racesFolder and racesFolder:FindFirstChild(CurrentRace)
 
             if not race then
-                -- Se a corrida sumiu do mapa (rodada resetando), reseta o estado e aguarda ela voltar
-                if Finished then
-                    Finished = false
-                end
+                if Finished then Finished = false end
                 continue
             end
 
@@ -64,7 +61,10 @@ local function SetupRaceDetector()
 
             if typeof(state) == "string" then
                 local stateLower = string.lower(state)
-               
+                
+                -- ==========================================
+                -- NOVA LÓGICA: PULO SE ESTIVER "RACE IN PROGRESS"
+                -- ==========================================
                 if string.find(stateLower, "race in progress") then
                     local currentTime = tick()
                     -- Verifica se já se passaram 5 segundos desde o último pulo
@@ -84,9 +84,7 @@ local function SetupRaceDetector()
                 end
                 -- ==========================================
 
-            -- Verifica se o atributo existe e se contém a frase (independente de maiúsculas/minúsculas)
-            if typeof(state) == "string" then
-                local stateLower = string.lower(state)
+                -- DETECÇÃO DE FIM DE CORRIDA
                 local isFinishing = string.find(stateLower, "finishing race")
 
                 if isFinishing then
@@ -100,17 +98,14 @@ local function SetupRaceDetector()
                         MainStart()
                     end
                 else
-                    -- Se o texto mudou para qualquer outra coisa, libera para a próxima detecção
                     Finished = false
                 end
             else
-                -- Se o atributo for nil ou não for string, reseta o gatilho
                 Finished = false
             end
         end
     end)
 end
-
 -- =========================
 -- HOOK REMOTES
 -- =========================
