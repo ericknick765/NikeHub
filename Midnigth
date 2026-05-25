@@ -42,35 +42,28 @@ local function SetupRaceDetector()
 
     print("Monitorando corrida:", CurrentRace)
 
-    task.spawn(function()
-
-        local lastState = ""
-
-        while AutoStart do
-
-            task.wait(0.2)
-
-            if not race or not race.Parent then
-                continue
-            end
-
+   
         task.spawn(function()
 
         while AutoStart do
 
+            task.wait(1)
 
-                task.wait(1)
+            print("===== CHILDREN =====")
 
-            print("===== ATRIBUTOS =====")
-
-            local attrs = race:GetAttributes()
-
-            for name, value in pairs(attrs) do
-                print(name, value)
+            for _, v in ipairs(race:GetDescendants()) do
+                
+                if v:IsA("StringValue")
+                or v:IsA("BoolValue")
+                or v:IsA("IntValue")
+                or v:IsA("NumberValue") then
+                    
+                    print(
+                        v:GetFullName(),
+                        v.Value
+                    )
+                end
             end
-        end
-    end)
-
         end
     end)
 end
