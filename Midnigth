@@ -190,7 +190,7 @@ local function SetupRaceDetector()
 
         print(CurrentRace, state)
 
-        if tostring(state):find("Finishing") then
+        if state == "Finishing race" then
             
             library:Notify(
                 CurrentRace.." terminou!",
