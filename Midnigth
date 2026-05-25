@@ -186,7 +186,7 @@ MainStart = function()
         end)
 
         print("Remote " .. i .. " disparado.")
-        task.wait(0.5) -- Delay preventivo entre os remotes para evitar ban/kick por spam
+        task.wait(2) -- Delay preventivo entre os remotes para evitar ban/kick por spam
     end
 end
 
