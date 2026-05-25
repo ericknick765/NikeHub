@@ -29,24 +29,6 @@ local function SetupRaceDetector()
         return
     end
 
-    local racesFolder = workspace:FindFirstChild("Races")
-
-    if not racesFolder then
-        
-        warn("Pasta Races não encontrada")
-
-        return
-    end
-
-    local race = racesFolder:FindFirstChild(CurrentRace)
-
-    if not race then
-        
-        warn("Corrida não encontrada:", CurrentRace)
-
-        return
-    end
-
     library:Notify(
         "Monitorando "..CurrentRace,
         4
@@ -54,7 +36,7 @@ local function SetupRaceDetector()
 
     print("Monitorando corrida:", CurrentRace)
 
-        task.spawn(function()
+    task.spawn(function()
 
         local lastPlayers = ""
 
@@ -63,11 +45,18 @@ local function SetupRaceDetector()
             task.wait(0.2)
 
             if not AutoStart then
-                task.wait(1)
                 continue
             end
 
-            if not race or not race.Parent then
+            local racesFolder = workspace:FindFirstChild("Races")
+
+            if not racesFolder then
+                continue
+            end
+
+            local race = racesFolder:FindFirstChild(CurrentRace)
+
+            if not race then
                 continue
             end
 
@@ -97,7 +86,6 @@ local function SetupRaceDetector()
             end
         end
     end)
-    
 end
 
 -- Hook
