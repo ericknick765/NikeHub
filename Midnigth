@@ -130,17 +130,8 @@ local function MainStart()
 
                     if race then
                         
-                        local RaceStage = race:GetAttribute("PlayersStr")
-
-                        if RaceStage then
-                            
-                            print("Atualizando corrida:", arg)
-                            
-                            newArgs[index] = RaceStage
-                        else
-                            
-                            newArgs[index] = race.Name
-                        end
+                        print("Atualizando corrida:", arg)
+                        newArgs[index] = race.Name
                     end
                 end
             end
@@ -152,7 +143,7 @@ local function MainStart()
 
         print("Remote "..i.." executado")
 
-        task.wait(2)
+        task.wait(1)
     end
 
 end
