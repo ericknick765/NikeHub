@@ -17,25 +17,20 @@ local WaitPlayer
 local CurrentRace
 local RaceConnection
 
-
 local function SetupRaceDetector()
 
-    if RaceConnection then
-        RaceConnection:Disconnect()
-    end
-
     if not CurrentRace then
+        
+        warn("Nenhuma corrida selecionada")
+        
         return
     end
 
-    local race = workspace.Races:FindFirstChild(CurrentRace)
+    local race = workspace:WaitForChild("Races"):FindFirstChild(CurrentRace)
 
     if not race then
         
-        library:Notify(
-            "Corrida não encontrada!",
-            4
-        )
+        warn("Corrida não encontrada:", CurrentRace)
 
         return
     end
@@ -45,30 +40,44 @@ local function SetupRaceDetector()
         4
     )
 
-    print("Conectando detector:", race.Name)
+    print("Monitorando corrida:", CurrentRace)
 
-    RaceConnection = race:GetAttributeChangedSignal("PlayersStr"):Connect(function()
+    task.spawn(function()
 
-    print("Evento disparou")
+        local lastState = ""
 
-    local state = race:GetAttribute("PlayersStr")
+        while AutoStart do
 
-    print(CurrentRace, state)
+            task.wait(0.2)
 
-    if state == "Finishing race" then
-        
-        print("FINALIZOU")
+            if not race or not race.Parent then
+                continue
+            end
 
-        library:Notify(
-            CurrentRace.." terminou!",
-            3
-        )
+            local state = race:GetAttribute("PlayersStr")
 
-        if AutoStart then
-            MainStart()
+            if state ~= lastState then
+
+                print("Mudou:", state)
+
+                lastState = state
+
+                if state == "Finishing race" then
+
+                    print("FINALIZOU")
+
+                    library:Notify(
+                        CurrentRace.." terminou!",
+                        3
+                    )
+
+                    task.wait(1)
+
+                    MainStart()
+                end
+            end
         end
-    end
-end)
+    end)
 end
 
 -- Hook
@@ -102,24 +111,30 @@ mt.__namecall = newcclosure(function(self, ...)
             })
     
             for _, arg in ipairs(args) do
-    
-               if typeof(arg) == "string" then
-        
-                    if workspace:FindFirstChild("Races") then
-            
-                        local race = workspace.Races:FindFirstChild(arg)
 
-                        if race then
-                
-                            CurrentRace = race.Name
+    print("ARG:", arg, typeof(arg))
 
-                            print("Corrida detectada:", CurrentRace)
+    if typeof(arg) == "string" then
 
-                            SetupRaceDetector()
-                        end
-                    end
-                end
+        local racesFolder = workspace:FindFirstChild("Races")
+
+        if racesFolder then
+
+            local race = racesFolder:FindFirstChild(arg)
+
+            if race then
+
+                CurrentRace = race.Name
+
+                print("Corrida detectada:", CurrentRace)
+
+                SetupRaceDetector()
+
+                break
             end
+        end
+    end
+end
 
             print("\n======= REMOTE "..#SavedRemotes.." SALVO =======")
             print("Nome:", self.Name)
