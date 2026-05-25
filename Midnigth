@@ -175,25 +175,30 @@ local function SetupRaceDetector()
         4
     )
 
+    print("Conectando detector:", race.Name)
+
     RaceConnection = race:GetAttributeChangedSignal("PlayersStr"):Connect(function()
 
-        local state = race:GetAttribute("PlayersStr")
+    print("Evento disparou")
 
-        print(CurrentRace, state)
+    local state = race:GetAttribute("PlayersStr")
 
-        if state == "Finishing race" then
-            
-            library:Notify(
-                CurrentRace.." terminou!",
-                3
-            )
+    print(CurrentRace, state)
 
-            if AutoStart then
-                
-                MainStart()
-            end
+    if state == "Finishing race" then
+        
+        print("FINALIZOU")
+
+        library:Notify(
+            CurrentRace.." terminou!",
+            3
+        )
+
+        if AutoStart then
+            MainStart()
         end
-    end)
+    end
+end)
 end
 
 local function PlayerDetected(player)
