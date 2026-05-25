@@ -29,7 +29,6 @@ local function SetupRaceDetector()
     end
 
     if not CurrentRace then
-        
         warn("Nenhuma corrida selecionada")
         return
     end
@@ -37,7 +36,6 @@ local function SetupRaceDetector()
     local race = workspace.Races:FindFirstChild(CurrentRace)
 
     if not race then
-        
         warn("Corrida não encontrada:", CurrentRace)
         return
     end
@@ -67,7 +65,10 @@ local function SetupRaceDetector()
 
             print("Estado:", state)
 
-            if state == "Finishing race" and not Finished then
+            -- Verifica se 'state' é uma string e se CONTÉM "Finishing race"
+            local isFinishing = type(state) == "string" and string.find(state, "Finishing race")
+
+            if isFinishing and not Finished then
                 
                 Finished = true
 
@@ -83,8 +84,8 @@ local function SetupRaceDetector()
                 MainStart()
             end
 
-            if state ~= "Finishing race" then
-                
+            -- Se não achou a string, reseta o Finished
+            if not isFinishing then
                 Finished = false
             end
         end
@@ -278,10 +279,8 @@ end
 -- =========================
 
 player.Idled:Connect(function()
-
     VirtualUser:CaptureController()
     VirtualUser:ClickButton2(Vector2.new())
-
 end)
 
 -- =========================
