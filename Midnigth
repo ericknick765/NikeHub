@@ -119,6 +119,8 @@ mt.__namecall = newcclosure(function(self, ...)
 
         if not alreadySaved then
             
+            local foundRace = false
+
             table.insert(SavedRemotes, {
                 Remote = self,
                 Args = args
@@ -140,16 +142,21 @@ mt.__namecall = newcclosure(function(self, ...)
 
                         if race then
 
+                            foundRace = true
+
                             CurrentRace = race.Name
 
                             print("Corrida detectada:", CurrentRace)
-
-                            SetupRaceDetector()
 
                             break
                         end
                     end
                 end
+            end
+
+            if foundRace then
+                
+                SetupRaceDetector()
             end
 
             print("\n======= REMOTE "..#SavedRemotes.." SALVO =======")
