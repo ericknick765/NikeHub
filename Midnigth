@@ -152,10 +152,9 @@ local function MainStart()
 
         print("Remote "..i.." executado")
 
-        task.wait(1)
+        task.wait(2)
     end
 
-    task.wait(15)
 end
 
 local function SetupRaceDetector()
@@ -266,13 +265,7 @@ mainWindow:Toggle("Auto-Start", function(state)
             "Auto-Start ativado!",
             3
         )
-
-        task.spawn(function()
-
-            while AutoStart do
-                  MainStart()
-            end
-        end)
+        MainStart()
     else
         
         library:Notify(
