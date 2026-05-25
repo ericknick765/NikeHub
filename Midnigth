@@ -54,28 +54,23 @@ local function SetupRaceDetector()
                 continue
             end
 
-            local state = race:GetAttribute("PlayersStr")
+        task.spawn(function()
 
-            if state ~= lastState then
+        while AutoStart do
 
-                print("Mudou:", state)
 
-                lastState = state
+                task.wait(1)
 
-                if state == "Finishing race" then
+            print("===== ATRIBUTOS =====")
 
-                    print("FINALIZOU")
+            local attrs = race:GetAttributes()
 
-                    library:Notify(
-                        CurrentRace.." terminou!",
-                        3
-                    )
-
-                    task.wait(1)
-
-                    MainStart()
-                end
+            for name, value in pairs(attrs) do
+                print(name, value)
             end
+        end
+    end)
+
         end
     end)
 end
