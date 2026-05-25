@@ -16,6 +16,7 @@ local TargetPlayer
 local WaitPlayer
 local CurrentRace
 local RaceConnection
+local MainStart
 
 local function SetupRaceDetector()
 
@@ -181,7 +182,7 @@ mt.__namecall = newcclosure(function(self, ...)
     return old(self, ...)
 end)
 
-local function MainStart()
+MainStart = function()
 
     task.wait(WaitPlayer or 0)
 
