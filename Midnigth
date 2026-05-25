@@ -122,36 +122,34 @@ mt.__namecall = newcclosure(function(self, ...)
                 Remote = self,
                 Args = args
             })
-        end
-    
-        for _, arg in ipairs(args) do
 
-        print("TESTANDO ARG:", arg, typeof(arg))
+            for _, arg in ipairs(args) do
 
-        if typeof(arg) == "string" then
+                print("TESTANDO ARG:", arg, typeof(arg))
 
-            local racesFolder = workspace:FindFirstChild("Races")
+                if typeof(arg) == "string" then
 
-            if racesFolder then
+                    local racesFolder = workspace:FindFirstChild("Races")
 
-                local race = racesFolder:FindFirstChild(arg)
+                    if racesFolder then
 
-                print("RACE ENCONTRADA:", race)
+                        local race = racesFolder:FindFirstChild(arg)
 
-                if race then
+                        print("RACE ENCONTRADA:", race)
 
-                    CurrentRace = race.Name
+                        if race then
 
-                    print("Corrida detectada:", CurrentRace)
+                            CurrentRace = race.Name
 
-                    SetupRaceDetector()
+                            print("Corrida detectada:", CurrentRace)
 
-                    break
+                            SetupRaceDetector()
+
+                            break
+                        end
+                    end
                 end
             end
-        end
-    end
-end
 
             print("\n======= REMOTE "..#SavedRemotes.." SALVO =======")
             print("Nome:", self.Name)
