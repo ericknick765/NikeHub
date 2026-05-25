@@ -19,6 +19,8 @@ local RaceConnection
 
 local function SetupRaceDetector()
 
+    print("SETUP CHAMADO")
+
     if not CurrentRace then
         
         warn("Nenhuma corrida selecionada")
@@ -26,7 +28,16 @@ local function SetupRaceDetector()
         return
     end
 
-    local race = workspace:WaitForChild("Races"):FindFirstChild(CurrentRace)
+    local racesFolder = workspace:FindFirstChild("Races")
+
+    if not racesFolder then
+        
+        warn("Pasta Races não encontrada")
+
+        return
+    end
+
+    local race = racesFolder:FindFirstChild(CurrentRace)
 
     if not race then
         
@@ -42,7 +53,6 @@ local function SetupRaceDetector()
 
     print("Monitorando corrida:", CurrentRace)
 
-   
     task.spawn(function()
 
         local lastPlayers = ""
@@ -50,6 +60,10 @@ local function SetupRaceDetector()
         while AutoStart do
 
             task.wait(0.2)
+
+            if not race or not race.Parent then
+                continue
+            end
 
             local playersStr = race:GetAttribute("PlayersStr")
             local countdownStr = race:GetAttribute("CountdownStr")
@@ -60,6 +74,20 @@ local function SetupRaceDetector()
                 print("CountdownStr:", countdownStr)
 
                 lastPlayers = playersStr
+
+                if tostring(playersStr) == "Finishing race" then
+
+                    print("FINALIZOU")
+
+                    library:Notify(
+                        CurrentRace.." terminou!",
+                        3
+                    )
+
+                    task.wait(1)
+
+                    MainStart()
+                end
             end
         end
     end)
@@ -94,28 +122,32 @@ mt.__namecall = newcclosure(function(self, ...)
                 Remote = self,
                 Args = args
             })
+        end
     
-            for _, arg in ipairs(args) do
+        for _, arg in ipairs(args) do
 
-    print("ARG:", arg, typeof(arg))
+        print("TESTANDO ARG:", arg, typeof(arg))
 
-    if typeof(arg) == "string" then
+        if typeof(arg) == "string" then
 
-        local racesFolder = workspace:FindFirstChild("Races")
+            local racesFolder = workspace:FindFirstChild("Races")
 
-        if racesFolder then
+            if racesFolder then
 
-            local race = racesFolder:FindFirstChild(arg)
+                local race = racesFolder:FindFirstChild(arg)
 
-            if race then
+                print("RACE ENCONTRADA:", race)
 
-                CurrentRace = race.Name
+                if race then
 
-                print("Corrida detectada:", CurrentRace)
+                    CurrentRace = race.Name
 
-                SetupRaceDetector()
+                    print("Corrida detectada:", CurrentRace)
 
-                break
+                    SetupRaceDetector()
+
+                    break
+                end
             end
         end
     end
