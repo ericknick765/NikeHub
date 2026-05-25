@@ -190,7 +190,7 @@ local function SetupRaceDetector()
 
         print(CurrentRace, state)
 
-        if tostring(state):find("Finished") then
+        if tostring(state):find("Finishing") then
             
             library:Notify(
                 CurrentRace.." terminou!",
@@ -265,7 +265,12 @@ mainWindow:Toggle("Auto-Start", function(state)
             "Auto-Start ativado!",
             3
         )
-        MainStart()
+
+        task.spawn(function()
+            MainStart()
+            task.wait(1)
+            MainStart()
+        end)
     else
         
         library:Notify(
