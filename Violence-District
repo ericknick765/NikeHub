@@ -107,8 +107,10 @@ local function getClosestGen()
         if model:IsA("Model") then
             
             for _, point in ipairs(model:GetChildren()) do
-                if point:GetAttribute("IsReparing") == false then
-                    
+                if point:GetAttribute("IsReparing") == true then
+                    return
+                end
+
                     local position
                     
                     if point:IsA("BasePart") then
@@ -126,7 +128,7 @@ local function getClosestGen()
                             closestAction = point
                         end
                     end
-                end
+                
             end
         end
     end
