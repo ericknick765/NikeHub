@@ -8,6 +8,15 @@ local GuiService = game:GetService("GuiService")
 
 local player = Players.LocalPlayer
 local PlayerGui = LocalPlayer:WaitForChild("PlayerGui")
+local ActiveGenerators = {}
+local LastUpdateTick = 0
+local LastFullESPRefresh = 0
+
+local TouchID = 8822
+local ActionPath = "Survivor-mob.Controls.action.check"
+local HeartbeatConnection = nil
+local VisibilityConnection = nil
+local IndicatorGui = nil
 
 -- // Window \\ --
 local window = library.new('Nike Hub', 'leadmarker')
