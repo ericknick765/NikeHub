@@ -3,6 +3,7 @@ local library = loadstring(game:HttpGet('https://raw.githubusercontent.com/nicke
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local VirtualInputManager = game:GetService("VirtualInputManager")
+local PathfindingService = game:GetService("PathfindingService")
 local RunService = game:GetService("RunService")
 local GuiService = game:GetService("GuiService")
 
@@ -46,7 +47,7 @@ local sector3 = section30.new_sector('Generator','Left')
 
 --// Variables \\--
 
-SkillCheckGenerator = false
+local SkillCheckGenerator = false
 
 local function GetActionTarget()
     local current = PlayerGui
@@ -87,7 +88,99 @@ local function AutoSkillCheck()
     end)
 end
 
+local function getClosestGen()
+    local Map = workspace:FindFirstChild("Map")
+    local MapGen = Map and Map:FindFirstChild("Generators")
+    
+    local character = player.Character
+    local root = character and character:FindFirstChild("HumanoidRootPart")
+    
+    if not MapGen or not root then
+        return nil, nil
+    end
+
+    local closestGen = nil
+    local closestAction = nil
+    local closestDistance = math.huge
+
+    for _, model in ipairs(MapGen:GetChildren()) do
+        if model:IsA("Model") then
+            
+            for _, point in ipairs(model:GetChildren()) do
+                if point:GetAttribute("IsReparing") == false then
+                    
+                    local position
+                    
+                    if point:IsA("BasePart") then
+                        position = point.Position
+                    elseif point:IsA("Attachment") then
+                        position = point.WorldPosition
+                    end
+                    
+                    if position then
+                        local distance = (root.Position - position).Magnitude
+                        
+                        if distance < closestDistance then
+                            closestDistance = distance
+                            closestGen = model
+                            closestAction = point
+                        end
+                    end
+                end
+            end
+        end
+    end
+
+    return closestGen, closestAction
+end
+
+local function MoveToPosition(character, targetPosition)
+    local humanoid = character:FindFirstChildOfClass("Humanoid")
+    local root = character:FindFirstChild("HumanoidRootPart")
+
+    if not humanoid or not root then
+        return false
+    end
+
+    local path = PathfindingService:CreatePath({
+        AgentRadius = 2,
+        AgentHeight = 5,
+        AgentCanJump = true,
+        AgentCanClimb = true,
+        WaypointSpacing = 3,
+    })
+
+    path:ComputeAsync(root.Position, targetPosition)
+
+    if path.Status ~= Enum.PathStatus.Success then
+        warn("Não foi possível encontrar um caminho")
+        return false
+    end
+
+    for _, waypoint in ipairs(path:GetWaypoints()) do
+        if waypoint.Action == Enum.PathWaypointAction.Jump then
+            humanoid.Jump = true
+        end
+
+        humanoid:MoveTo(waypoint.Position)
+
+        local reached = humanoid.MoveToFinished:Wait()
+
+        if not reached then
+            return false
+        end
+    end
+
+    return true
+end
+
 -- // Elements \\ -- (Type, Name, State, Callback)
+
+local button = sector3.element('Button', 'Walk to Generator', nil, function()
+    local generator, action = getClosestGen()
+
+    MoveToPosition(LocalPlayer.Character, action)
+end)
 
 local ToggleAutoSkillCheck = sector3.element('Toggle', 'Auto Skill Check', false, function(v)
     SkillCheckGenerator = v
