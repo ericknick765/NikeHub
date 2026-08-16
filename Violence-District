@@ -179,7 +179,21 @@ end
 local button = sector3.element('Button', 'Walk to Generator', nil, function()
     local generator, action = getClosestGen()
 
-    MoveToPosition(LocalPlayer.Character, action)
+    if not action then
+        warn("Nenhum gerador disponível encontrado")
+        return
+    end
+
+    local targetPosition
+    if action:IsA("BasePart") then
+        targetPosition = action.Position
+    elseif action:IsA("Attachment") then
+        targetPosition = action.WorldPosition
+    end
+
+    if targetPosition then
+        MoveToPosition(LocalPlayer.Character, targetPosition)
+    end
 end)
 
 local ToggleAutoSkillCheck = sector3.element('Toggle', 'Auto Skill Check', false, function(v)
