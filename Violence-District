@@ -38,7 +38,7 @@ SkillCheckGenerator = false
 -- // Elements \\ -- (Type, Name, State, Callback)
 
 local ToggleAutoSkillCheck = sector3.element('Toggle', 'Auto Skill Check', false, function(v)
-    SkillCheckGenerator = v.Toggle
+    SkillCheckGenerator = v
 
     if SkillCheckGenerator then
         while SkillCheckGenerator do
