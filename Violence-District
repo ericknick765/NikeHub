@@ -196,6 +196,12 @@ local button = sector3.element('Button', 'Walk to Generator', nil, function()
     end
 end)
 
+local button = sector3.element('Button', 'Walk Test', nil, function()
+    local Test = workspace:WaitForChild("ericknick765")
+
+    MoveToPosition(LocalPlayer.Character, Test.HumanoidRootPart.Position)
+end)
+
 local ToggleAutoSkillCheck = sector3.element('Toggle', 'Auto Skill Check', false, function(v)
     SkillCheckGenerator = v
 end)
