@@ -92,7 +92,7 @@ local function getClosestGen()
     local Map = workspace:FindFirstChild("Map")
     local MapGen = Map and Map:FindFirstChild("Generators")
     
-    local character = player.Character
+    local character = LocalPlayer.Character
     local root = character and character:FindFirstChild("HumanoidRootPart")
     
     if not MapGen or not root then
