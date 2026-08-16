@@ -1,0 +1,209 @@
+local library = loadstring(game:HttpGet('https://raw.githubusercontent.com/nickexeqq-sketch/SailorPiecePro/refs/heads/main/library.lua'))()
+
+local Players = game:GetService("Players")
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+
+local player = Players.LocalPlayer
+
+-- // Window \\ --
+local window = library.new('leadmarker is so hot', 'leadmarker')
+
+-- // Tabs \\ --
+local tab = window.new_tab('rbxassetid://135134402309970')
+local tab1 = window.new_tab('rbxassetid://86376494832390') 
+local tab2 = window.new_tab('rbxassetid://118454203190440')
+local tab3 = window.new_tab('rbxassetid://129505109777226')
+
+-- // Sections \\ --
+local section = tab.new_section('Bruh XD')
+local section2 = tab.new_section(':DDD HI')
+local section3 = tab.new_section('Boss')
+
+local section20 = tab2.new_section('Teleports')
+
+local section30 = tab3.new_section('Automatically')
+
+-- // Sector \\ --
+local sector = section.new_sector('OK', 'Left')
+local sector1 = section.new_sector('BRUHHHH', 'Right')
+
+local sector2 = section20.new_sector('Portal Teleport','Right')
+
+
+local sector3 = section30.new_sector('Stats','Left')
+
+local remote = ReplicatedStorage
+    :WaitForChild("CombatSystem")
+    :WaitForChild("Remotes")
+    :WaitForChild("RequestHit")
+   
+local AllocatedStat = ReplicatedStorage
+        :WaitForChild("RemoteEvents")
+        :WaitForChild("AllocateStat")
+
+local TeleportToPortal = ReplicatedStorage
+          :WaitForChild("Remotes")
+          :WaitForChild("TeleportToPortal")
+          
+          
+          
+local keywords = {
+    ["Starter Island"] = "Starter",
+    
+    ["Jungle Island"] = "Jungle",
+    
+    ["Desert Island"] = "Desert",
+    
+    ["Snow Island"] = "Snow",
+    
+    ["Sailor Island"] = "Sailor",
+    
+    ["Shibuya Station"] = "Shibuya",
+    
+    ["Hollow Island"] = "HollowIsland",
+    
+    ["Boss Island"] = "Boss",
+    
+    ["Dungeon Island"] = "Dungeon",
+    
+    ["Shinjuku Island"] = "Shinjuku",
+    
+    ["Slime Island"] = "Slime",
+    
+    ["Academy Island"] = "Academy",
+    
+    ["Judgement Island"] = "Judgement",
+    
+    ["Soul Dominion"] = "SoulDominion",
+    
+    ["Ninja Island"] = "Ninja",
+    
+    ["Lawless Island"] = "Lawless",
+    
+    ["Tower Island"] = "Tower",
+    
+    ["World Island"] = "World"
+    
+}
+
+local KillAura = false
+local AutoStats = false
+local MaxDistance = 100
+local selectedMob = {}
+local selectedStat = {}
+local selectedWord = {}
+
+local function getClosestMob()
+    local closest = nil
+    local distance = MaxDistance
+
+    for _, mob in pairs(workspace:GetDescendants()) do
+        if mob:IsA("Model") then
+
+            local humanoid = mob:FindFirstChildOfClass("Humanoid")
+            local root = mob:FindFirstChild("HumanoidRootPart")
+
+            if humanoid and root and humanoid.Health > 0 and mob ~= player.Character then
+
+                local valid = false
+
+                for _, mobName in pairs(selectedMob) do
+                    if string.find(string.lower(mob.Name), string.lower(mobName)) then
+                        valid = true
+                        break
+                    end
+                end
+
+                if valid then
+                    local mag = (player.Character.HumanoidRootPart.Position - root.Position).Magnitude
+
+                    if mag < distance then
+                        distance = mag
+                        closest = root
+                    end
+                end
+            end
+        end
+    end
+
+    return closest
+end
+
+local function AutoSetStats ()
+        local statusQnt = player.Data.StatPoints.Value
+        if statusQnt <= 0 then return end
+        local divided  = math.floor(statusQnt  / #selectedStat)
+        
+        for _, selected in pairs(selectedStat) do
+              AllocatedStat:FireServer(selected, divided)
+        end
+        
+end
+
+-- // Elements \\ -- (Type, Name, State, Callback)
+local button = sector.element('Button', 'Button', nil, function()
+        
+end)
+
+local toggle = sector.element('Toggle', 'Kill Aura', false, function(v)
+    KillAura = v.Toggle
+
+    if KillAura then
+        task.spawn(function()
+            while KillAura do
+                task.wait(0.2)
+
+                pcall(function()
+                    local target = getClosestMob()
+
+                    if target then
+                        remote:FireServer(target.Position)
+                    end
+                end)
+            end
+        end)
+    end
+end)
+toggle:add_color({Color = Color3.fromRGB(84, 101, 255)}, nil, function(v)
+   print(v.Color)    
+end)
+
+local dropdown = sector.element('Dropdown', 'Dropdown', {options = {'one', 'two', 'three'}}, function(v)
+   print(v.Dropdown)
+end)
+
+local slider = sector.element('Slider', 'Slider', {default = {min = 1, max = 500, default = 100}}, function(v)
+   MaxDistance = v.Slider
+end)
+
+local comboMob = sector.element('Combo', 'Mob Select', {
+    options = {'Thief', 'Zombie', 'Bandit'}
+}, function(v)
+    selectedMob = v.Combo
+end)
+
+local dropdown = sector2.element('Dropdown', 'Words', {options = {'Starter Island', 'Jungle Island', 'Desert Island','Snow Island','Sailor Island','Shibuya Station','Hollow Island','Boss Island','Dungeon Island','Shinjuku Island','Slime Island','Academy Island','Judment Island','Soul Dominion','Ninja Island','Lawless Island','Tower Island','World Island'}}, function(v)
+   local island = v.Dropdown
+   selectedWord = keywords[island]
+end)
+
+local button = sector2.element('Button', 'Teleport Island', nil, function()
+      TeleportToPortal:FireServer(selectedWord)
+      print(selectedWord)
+end)
+
+local comboStat = sector3.element('Combo', 'Stats Select', {
+    options = {'Melee', 'Sword', 'Defense','Power'}
+}, function(v)
+    selectedStat = v.Combo
+end)
+
+local toggleStat = sector3.element('Toggle', 'Auto stats', false, function(v)
+      AutoStats = v.Toggle
+         if AutoStats then
+               while AutoStats do
+                     task.wait(1)
+                      AutoSetStats()
+               end
+         end
+end)
