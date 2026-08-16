@@ -147,8 +147,8 @@ local function MoveToPosition(character, targetPosition)
     local path = PathfindingService:CreatePath({
         AgentRadius = 3,
         AgentHeight = 5,
-        AgentCanJump = true,
-        AgentCanClimb = true,
+        AgentCanJump = false,
+        AgentCanClimb = false,
         WaypointSpacing = 5,
     })
 
