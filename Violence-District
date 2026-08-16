@@ -2,8 +2,12 @@ local library = loadstring(game:HttpGet('https://raw.githubusercontent.com/nicke
 
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local VirtualInputManager = game:GetService("VirtualInputManager")
+local GuiService = game:GetService("GuiService")
+
 
 local player = Players.LocalPlayer
+local PlayerGui = LocalPlayer:WaitForChild("PlayerGui")
 
 -- // Window \\ --
 local window = library.new('Nike Hub', 'leadmarker')
@@ -35,6 +39,45 @@ local sector3 = section30.new_sector('Generator','Left')
 
 SkillCheckGenerator = false
 
+local function GetActionTarget()
+    local current = PlayerGui
+    for segment in string.gmatch(ActionPath, "[^%.]+") do current = current and current:FindFirstChild(segment) end
+    return current
+end
+
+local function TriggerMobileButton()
+    local b = GetActionTarget()
+    if b and b:IsA("GuiObject") then
+        local p, s, i = b.AbsolutePosition, b.AbsoluteSize, GuiService:GetGuiInset()
+        local cx, cy = p.X + (s.X/2) + i.X, p.Y + (s.Y/2) + i.Y
+        pcall(function() VirtualInputManager:SendTouchEvent(TouchID, 0, cx, cy) task.wait(0.01) VirtualInputManager:SendTouchEvent(TouchID, 2, cx, cy) end)
+    end
+end
+
+local function AutoSkillCheck()
+    task.spawn(function()
+        local prompt = PlayerGui:WaitForChild("SkillCheckPromptGui", 10)
+        local check = prompt and prompt:WaitForChild("Check", 10)
+
+        if not check then return end
+        local line, goal = check:WaitForChild("Line"), check:WaitForChild("Goal")
+        if VisibilityConnection then VisibilityConnection:Disconnect() end
+        VisibilityConnection = check:GetPropertyChangedSignal("Visible"):Connect(function()
+            if LocalPlayer.Team and LocalPlayer.Team.Name == "Survivors" and check.Visible then
+                if HeartbeatConnection then HeartbeatConnection:Disconnect() end
+                HeartbeatConnection = RunService.Heartbeat:Connect(function()
+                    local lr, gr = line.Rotation % 360, goal.Rotation % 360
+                    local ss, se = (gr + 101) % 360, (gr + 115) % 360
+                    if (ss > se and (lr >= ss or lr <= se)) or (lr >= ss and lr <= se) then
+                        TriggerMobileButton()
+                        if HeartbeatConnection then HeartbeatConnection:Disconnect() HeartbeatConnection = nil end
+                    end
+                end)
+            elseif HeartbeatConnection then HeartbeatConnection:Disconnect() HeartbeatConnection = nil end
+        end)
+    end)
+end
+
 -- // Elements \\ -- (Type, Name, State, Callback)
 
 local ToggleAutoSkillCheck = sector3.element('Toggle', 'Auto Skill Check', false, function(v)
@@ -42,7 +85,7 @@ local ToggleAutoSkillCheck = sector3.element('Toggle', 'Auto Skill Check', false
 
     if SkillCheckGenerator then
         while SkillCheckGenerator do
-            print("aaaaa")
+            AutoSkillCheck()
             task.wait(1)
         end
     end
