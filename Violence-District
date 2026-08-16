@@ -3,6 +3,7 @@ local library = loadstring(game:HttpGet('https://raw.githubusercontent.com/nicke
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local VirtualInputManager = game:GetService("VirtualInputManager")
+local RunService = game:GetService("RunService")
 local GuiService = game:GetService("GuiService")
 
 local LocalPlayer = Players.LocalPlayer
@@ -91,10 +92,10 @@ end
 local ToggleAutoSkillCheck = sector3.element('Toggle', 'Auto Skill Check', false, function(v)
     SkillCheckGenerator = v
 
-    if SkillCheckGenerator then
-        while SkillCheckGenerator do
+    task.spawn(function()
+    while task.wait(1) do
+        if SkillCheckGenerator then
             AutoSkillCheck()
-            task.wait(1)
         end
     end
 end)
