@@ -138,7 +138,6 @@ local function getClosestGen()
         return nil, nil
     end
 
-    print("Pass1")
 
     for _, model in ipairs(MapGen:GetChildren()) do
         if not model:IsA("Model") then
@@ -150,7 +149,7 @@ local function getClosestGen()
         if progress ~= nil and progress >= 100 then
             continue
         end
-        print("Pass2")
+
         for _, point in ipairs(model:GetDescendants()) do
             if not point.Name:lower():find("generatorpoint") then
                 continue
@@ -169,7 +168,6 @@ local function getClosestGen()
             elseif point:IsA("Attachment") then
                 position = point.WorldPosition
             end
-            print("Pass3")
             if position then
                 local distance = (root.Position - position).Magnitude
 
@@ -181,8 +179,6 @@ local function getClosestGen()
             end
         end -- fecha loop de point
     end -- fecha loop de model
-
-    print(closestGen,closestAction)
 
     return closestGen, closestAction -- agora fora dos dois loops
 end
@@ -300,6 +296,7 @@ local function MoveToPosition(character, targetPosition, maxAttempts, callback)
                 end
 
                 if os.clock() - startTime > timeout then
+                    print("⚠️ Timeout no waypoint", i, "de", #waypoints)
                     failed = true
                     break
                 end
@@ -315,6 +312,7 @@ local function MoveToPosition(character, targetPosition, maxAttempts, callback)
         blockedConnection:Disconnect()
 
         if not failed then
+            print("✅ Chegou no destino, chamando callback(true)")
             if callback then
                 callback(true)
             end
@@ -324,9 +322,10 @@ local function MoveToPosition(character, targetPosition, maxAttempts, callback)
         task.wait(0.1)
     end
 
-    if callback then
-        callback(false)
-    end
+    print("❌ Todas as tentativas falharam, callback(false)")
+        if callback then
+            callback(false)
+        end
     return false
 end
 
