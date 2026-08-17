@@ -76,7 +76,7 @@ local function AutoSkillCheck()
 
         math.randomseed(os.time())
 
-        local opcoes = {5, 40}
+        local opcoes = {5, 30}
         local OFFSET = opcoes[math.random(1, 2)]
 
         if HeartbeatConnection then HeartbeatConnection:Disconnect() end
