@@ -48,6 +48,7 @@ local sector3 = section30.new_sector('Generator','Left')
 --// Variables \\--
 
 local SkillCheckGenerator = false
+local GoalConnection
 
 local function GetActionTarget()
     local current = PlayerGui
@@ -68,22 +69,52 @@ local function AutoSkillCheck()
     task.spawn(function()
         local prompt = PlayerGui:WaitForChild("SkillCheckPromptGui", 10)
         local check = prompt and prompt:WaitForChild("Check", 10)
-
         if not check then return end
         local line, goal = check:WaitForChild("Line"), check:WaitForChild("Goal")
+
+        local triggered = false
+        local lastGoalRotation = goal.Rotation
+
+        local function tryTrigger()
+            local lr, gr = line.Rotation % 360, goal.Rotation % 360
+            local ss, se = (gr + 101) % 360, (gr + 115) % 360
+            local inZone = (ss > se and (lr >= ss or lr <= se)) or (lr >= ss and lr <= se)
+
+            if inZone and not triggered then
+                triggered = true
+                TriggerMobileButton()
+            end
+        end
+
+        local function startHeartbeat()
+            if HeartbeatConnection then HeartbeatConnection:Disconnect() end
+            triggered = false
+            HeartbeatConnection = RunService.Heartbeat:Connect(tryTrigger)
+        end
+
         if VisibilityConnection then VisibilityConnection:Disconnect() end
+        if HeartbeatConnection then HeartbeatConnection:Disconnect() HeartbeatConnection = nil end
+        if GoalConnection then GoalConnection:Disconnect() GoalConnection = nil end
+
+        -- Dispara quando a UI abre/fecha
         VisibilityConnection = check:GetPropertyChangedSignal("Visible"):Connect(function()
             if LocalPlayer.Team and LocalPlayer.Team.Name == "Survivors" and check.Visible then
-                if HeartbeatConnection then HeartbeatConnection:Disconnect() end
-                HeartbeatConnection = RunService.Heartbeat:Connect(function()
-                    local lr, gr = line.Rotation % 360, goal.Rotation % 360
-                    local ss, se = (gr + 101) % 360, (gr + 115) % 360
-                    if (ss > se and (lr >= ss or lr <= se)) or (lr >= ss and lr <= se) then
-                        TriggerMobileButton()
-                        if HeartbeatConnection then HeartbeatConnection:Disconnect() HeartbeatConnection = nil end
-                    end
-                end)
-            elseif HeartbeatConnection then HeartbeatConnection:Disconnect() HeartbeatConnection = nil end
+                lastGoalRotation = goal.Rotation
+                startHeartbeat()
+            elseif HeartbeatConnection then
+                HeartbeatConnection:Disconnect()
+                HeartbeatConnection = nil
+            end
+        end)
+
+        -- Dispara quando um NOVO skill check aparece sem a UI fechar (chain)
+        GoalConnection = goal:GetPropertyChangedSignal("Rotation"):Connect(function()
+            if check.Visible
+                and LocalPlayer.Team and LocalPlayer.Team.Name == "Survivors"
+                and math.abs(goal.Rotation - lastGoalRotation) > 1 then
+                lastGoalRotation = goal.Rotation
+                startHeartbeat()
+            end
         end)
     end)
 end
@@ -105,7 +136,8 @@ local function getClosestGen()
 
     for _, model in ipairs(MapGen:GetChildren()) do
         if model:IsA("Model") then
-            
+            if model:GetAttribute("RepairProgress") == 100 then return end
+
             for _, point in ipairs(model:GetChildren()) do
                 if point:GetAttribute("IsReparing") == true then
                     return
