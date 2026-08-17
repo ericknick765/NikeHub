@@ -74,7 +74,10 @@ local function AutoSkillCheck()
         local triggered = false
         local lastGoal = goal.Rotation
 
-        local OFFSET = 0 or 20
+        math.randomseed(os.time())
+
+        local opcoes = {5, 40}
+        local OFFSET = opcoes[math.random(1, 2)]
 
         if HeartbeatConnection then HeartbeatConnection:Disconnect() end
         HeartbeatConnection = RunService.Heartbeat:Connect(function()
