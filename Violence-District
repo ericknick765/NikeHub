@@ -112,7 +112,14 @@ end
 
 local function getClosestGen()
     local Map = workspace:FindFirstChild("Map")
-    local MapGen = Map and Map:FindFirstChild("Generators")
+    local FindFolder = #Map:FindFirstChild("Genarators"):GetChildren()
+    local MapGen = nil
+
+    if FindFolder <= 1 then
+        MapGen = Map:FindFirstChild("newGenerators")
+    else
+        MapGen = Map:FindFirstChild("Genarators")
+    end
 
     local character = LocalPlayer.Character
     local root = character and character:FindFirstChild("HumanoidRootPart")
@@ -130,15 +137,12 @@ local function getClosestGen()
             continue
         end
 
-        -- RepairProgress é opcional
         local progress = model:GetAttribute("RepairProgress")
 
-        -- Só ignora se realmente existir e estiver em 100+
         if progress ~= nil and progress >= 100 then
             continue
         end
 
-        -- Procura o Action dentro do gerador
         for _, point in ipairs(model:GetDescendants()) do
 
             if point.Name ~= "Action" then
