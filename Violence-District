@@ -278,7 +278,7 @@ local ToggleAutoSkillCheck = sector3.element('Toggle', 'Auto Skill Check', false
 end)
 
 task.spawn(function()
-    while task.wait(1) do
+    while task.wait(0.1) do
         if SkillCheckGenerator then
             AutoSkillCheck()
         end
