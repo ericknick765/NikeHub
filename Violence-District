@@ -112,7 +112,7 @@ end
 
 local function getClosestGen()
     local Map = workspace:FindFirstChild("Map")
-    local MapGen = nil
+    local MapGen 
 
     if Map then
         for _, v in ipairs(Map:GetDescendants()) do
