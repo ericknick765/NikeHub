@@ -111,10 +111,10 @@ end
 local function getClosestGen()
     local Map = workspace:FindFirstChild("Map")
     local MapGen = Map and Map:FindFirstChild("Generators")
-    
+
     local character = LocalPlayer.Character
     local root = character and character:FindFirstChild("HumanoidRootPart")
-    
+
     if not MapGen or not root then
         return nil, nil
     end
@@ -133,27 +133,26 @@ local function getClosestGen()
 
             for _, point in ipairs(model:GetChildren()) do
                 if point:GetAttribute("IsReparing") == true then
-                    return
+                    continue -- pula só esse ponto, não a função inteira
                 end
 
                 local position
-                    
+
                 if point:IsA("BasePart") then
                     position = point.Position
                 elseif point:IsA("Attachment") then
                     position = point.WorldPosition
                 end
-                    
+
                 if position then
                     local distance = (root.Position - position).Magnitude
-                        
+
                     if distance < closestDistance then
                         closestDistance = distance
                         closestGen = model
                         closestAction = point
                     end
                 end
-                
             end
         end
     end
