@@ -199,11 +199,11 @@ local function MoveToPosition(character, targetPosition, maxAttempts)
         end
 
         local path = PathfindingService:CreatePath({
-            AgentRadius = 3,
+            AgentRadius = 2, -- mais próximo do tamanho real do personagem
             AgentHeight = 5,
             AgentCanJump = false,
             AgentCanClimb = false,
-            WaypointSpacing = 4,
+            WaypointSpacing = 2, -- waypoints mais próximos = curvas mais suaves
         })
 
         local success, err = pcall(function()
@@ -221,7 +221,6 @@ local function MoveToPosition(character, targetPosition, maxAttempts)
         end
 
         local waypoints = path:GetWaypoints()
-
         local blocked = false
 
         local blockedConnection = path.Blocked:Connect(function()
@@ -230,7 +229,7 @@ local function MoveToPosition(character, targetPosition, maxAttempts)
 
         local failed = false
 
-        for _, waypoint in ipairs(waypoints) do
+        for i, waypoint in ipairs(waypoints) do
 
             if not character.Parent or humanoid.Health <= 0 then
                 failed = true
@@ -244,14 +243,35 @@ local function MoveToPosition(character, targetPosition, maxAttempts)
 
             humanoid:MoveTo(waypoint.Position)
 
-            local reached = humanoid.MoveToFinished:Wait()
+            -- espera chegar perto o suficiente, sem exigir parada total
+            local reachedThreshold = 3 -- studs de tolerância
+            local startTime = os.clock()
+            local timeout = 3 -- evita travar pra sempre se algo der errado
 
-            TriggerMobileButton()
+            while (root.Position - waypoint.Position).Magnitude > reachedThreshold do
+                if not character.Parent or humanoid.Health <= 0 then
+                    failed = true
+                    break
+                end
 
-            if not reached then
-                failed = true
+                if blocked then
+                    failed = true
+                    break
+                end
+
+                if os.clock() - startTime > timeout then
+                    failed = true
+                    break
+                end
+
+                task.wait()
+            end
+
+            if failed then
                 break
             end
+
+            TriggerMobileButton()
         end
 
         blockedConnection:Disconnect()
