@@ -112,13 +112,15 @@ end
 
 local function getClosestGen()
     local Map = workspace:FindFirstChild("Map")
-    local FindFolder = #Map:FindFirstChild("Genarators"):GetChildren()
     local MapGen = nil
 
-    if FindFolder <= 1 then
-        MapGen = Map:FindFirstChild("newGenerators")
-    else
-        MapGen = Map:FindFirstChild("Genarators")
+    if Map then
+        for _, v in ipairs(Map:GetDescendants()) do
+            if v:IsA("Model") and v.Parent.Name:match("Generators") then
+                MapGen = v.Parent
+                break
+            end
+        end
     end
 
     local character = LocalPlayer.Character
