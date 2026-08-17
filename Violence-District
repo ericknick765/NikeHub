@@ -93,6 +93,7 @@ local function AutoSkillCheck()
             local inZone = (ss > se and (lr >= ss or lr <= se)) or (lr >= ss and lr <= se)
 
             if inZone then
+                task.wait(0.2)
                 triggered = true
                 TriggerMobileButton()
             end
