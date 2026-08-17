@@ -119,7 +119,7 @@ local function getClosestGen()
 
     if Map then
         for _, child in ipairs(Map:GetChildren()) do
-            if child:IsA("Folder") and child.Name:lower():find("generator") and #child:GetChildren() > 0 then
+            if child:IsA("Folder") and child.Name:lower():find("generator") and #child.Parent:GetChildren() > 0 then
                 MapGen = child
                 break
             end
