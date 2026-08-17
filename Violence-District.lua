@@ -121,7 +121,6 @@ local function getClosestGen()
         for _, child in ipairs(Map:GetChildren()) do
             if child:IsA("Folder") and child.Name:lower():find("generator") and #child:GetChildren() > 0 then
                 MapGen = child
-                print(child)
                 break
             end
         end
@@ -211,12 +210,14 @@ end
 
 
 local function MoveToPosition(character, targetPosition, maxAttempts, callback)
+    print("🟡 MoveToPosition chamada, target:", targetPosition)
     maxAttempts = maxAttempts or 3
 
     local humanoid = character:FindFirstChildOfClass("Humanoid")
     local root = character:FindFirstChild("HumanoidRootPart")
 
     if not humanoid or not root then
+        print("🔴 Sem humanoid ou root")
         if callback then
             callback(false)
         end
@@ -225,7 +226,11 @@ local function MoveToPosition(character, targetPosition, maxAttempts, callback)
 
     for attempt = 1, maxAttempts do
 
+        print("🟡 Tentativa", attempt)
+
         if not character.Parent or humanoid.Health <= 0 then
+            print("🔴 Personagem sem Parent ou morto")
+
             if callback then
                 callback(false)
             end
@@ -245,7 +250,7 @@ local function MoveToPosition(character, targetPosition, maxAttempts, callback)
         end)
 
         if not success then
-            warn("Erro no Pathfinding:", err)
+            warn("🔴 Erro no Pathfinding:", err)
             if callback then
                 callback(false)
             end
@@ -256,6 +261,8 @@ local function MoveToPosition(character, targetPosition, maxAttempts, callback)
             task.wait(0.2)
             continue
         end
+
+        print("🟡 Path status:", path.Status)
 
         local waypoints = filterWaypoints(path:GetWaypoints())
         local blocked = false
