@@ -118,6 +118,7 @@ local function getClosestGen()
         for _, child in ipairs(Map:GetChildren()) do
             if child:IsA("Folder") and child.Name:lower():find("Generator") then
                 MapGen = child
+                print(MapGen:GetFullName())
                 break
             end
         end
