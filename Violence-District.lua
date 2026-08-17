@@ -241,14 +241,12 @@ end
 
 
 local function MoveToPosition(character, targetPosition, maxAttempts, callback)
-    print("🟡 MoveToPosition chamada, target:", targetPosition)
     maxAttempts = maxAttempts or 3
 
     local humanoid = character:FindFirstChildOfClass("Humanoid")
     local root = character:FindFirstChild("HumanoidRootPart")
 
     if not humanoid or not root then
-        print("🔴 Sem humanoid ou root")
         if callback then
             callback(false)
         end
@@ -256,12 +254,7 @@ local function MoveToPosition(character, targetPosition, maxAttempts, callback)
     end
 
     for attempt = 1, maxAttempts do
-
-        print("🟡 Tentativa", attempt)
-
         if not character.Parent or humanoid.Health <= 0 then
-            print("🔴 Personagem sem Parent ou morto")
-
             if callback then
                 callback(false)
             end
@@ -269,7 +262,7 @@ local function MoveToPosition(character, targetPosition, maxAttempts, callback)
         end
 
         local path = PathfindingService:CreatePath({
-            AgentRadius = 2.5,
+            AgentRadius = 3,
             AgentHeight = 5,
             AgentCanJump = false,
             AgentCanClimb = false,
@@ -292,8 +285,6 @@ local function MoveToPosition(character, targetPosition, maxAttempts, callback)
             task.wait(0.2)
             continue
         end
-
-        print("🟡 Path status:", path.Status)
 
         local waypoints = filterWaypoints(path:GetWaypoints())
         local blocked = false
@@ -334,7 +325,6 @@ local function MoveToPosition(character, targetPosition, maxAttempts, callback)
                 end
 
                 if os.clock() - startTime > timeout then
-                    print("⚠️ Timeout no waypoint", i, "de", #waypoints)
                     failed = true
                     break
                 end
@@ -350,7 +340,6 @@ local function MoveToPosition(character, targetPosition, maxAttempts, callback)
         blockedConnection:Disconnect()
 
         if not failed then
-            print("✅ Chegou no destino, chamando callback(true)")
             if callback then
                 callback(true)
             end
@@ -360,10 +349,10 @@ local function MoveToPosition(character, targetPosition, maxAttempts, callback)
         task.wait(0.1)
     end
 
-    print("❌ Todas as tentativas falharam, callback(false)")
-        if callback then
-            callback(false)
-        end
+    if callback then
+        callback(false)
+    end
+    
     return false
 end
 
