@@ -49,6 +49,9 @@ local sector3 = section30.new_sector('Generator','Left')
 
 local SkillCheckGenerator = false
 
+math.randomseed(os.time())
+local opcoes = {5, 30}
+
 local function GetActionTarget()
     local current = PlayerGui
     for segment in string.gmatch(ActionPath, "[^%.]+") do current = current and current:FindFirstChild(segment) end
@@ -74,9 +77,6 @@ local function AutoSkillCheck()
         local triggered = false
         local lastGoal = goal.Rotation
 
-        math.randomseed(os.time())
-
-        local opcoes = {5, 30}
         local OFFSET = opcoes[math.random(1, 2)]
 
         if HeartbeatConnection then HeartbeatConnection:Disconnect() end
@@ -299,7 +299,7 @@ local ToggleAutoSkillCheck = sector3.element('Toggle', 'Auto Skill Check', false
 end)
 
 task.spawn(function()
-    while task.wait(0.1) do
+    while task.wait(0.2) do
         if SkillCheckGenerator then
             AutoSkillCheck()
         end
