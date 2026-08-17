@@ -119,8 +119,9 @@ local function getClosestGen()
 
     if Map then
         for _, child in ipairs(Map:GetChildren()) do
-            if child:IsA("Folder") and child.Name:lower():find("generator") and #child.Parent:GetChildren() > 0 then
+            if child:IsA("Folder") and child.Name:lower():find("generator") and #child:GetChildren() > 0 then
                 MapGen = child
+                print(child)
                 break
             end
         end
@@ -129,13 +130,15 @@ local function getClosestGen()
     local character = LocalPlayer.Character
     local root = character and character:FindFirstChild("HumanoidRootPart")
 
+    local closestGen = nil
+    local closestAction = nil
+    local closestDistance = math.huge
+
     if not MapGen or not root then
         return nil, nil
     end
 
-    local closestGen = nil
-    local closestAction = nil
-    local closestDistance = math.huge
+    print("Pass1")
 
     for _, model in ipairs(MapGen:GetChildren()) do
         if not model:IsA("Model") then
@@ -147,7 +150,7 @@ local function getClosestGen()
         if progress ~= nil and progress >= 100 then
             continue
         end
-
+        print("Pass2")
         for _, point in ipairs(model:GetDescendants()) do
             if not point.Name:lower():find("generatorpoint") then
                 continue
@@ -166,7 +169,7 @@ local function getClosestGen()
             elseif point:IsA("Attachment") then
                 position = point.WorldPosition
             end
-
+            print("Pass3")
             if position then
                 local distance = (root.Position - position).Magnitude
 
@@ -179,6 +182,8 @@ local function getClosestGen()
         end -- fecha loop de point
     end -- fecha loop de model
 
+    print(closestGen,closestAction)
+    
     return closestGen, closestAction -- agora fora dos dois loops
 end
 
