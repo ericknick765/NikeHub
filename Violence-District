@@ -93,7 +93,7 @@ local function AutoSkillCheck()
             local inZone = (ss > se and (lr >= ss or lr <= se)) or (lr >= ss and lr <= se)
 
             if inZone then
-                task.wait(0.5)
+                task.wait(0.2)
                 triggered = true
                 TriggerMobileButton()
             end
@@ -126,9 +126,8 @@ local function getClosestGen()
 
     for _, model in ipairs(MapGen:GetChildren()) do
         if model:IsA("Model") then
-            local progress = model:GetAttribute("RepairProgress")
-
-            if progress == nil or progress >= 100 then
+            
+            if model:GetAttribute("RepairProgress") >= 100 then
                 continue
             end
 
