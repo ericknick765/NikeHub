@@ -116,9 +116,8 @@ local function getClosestGen()
 
     if Map then
         for _, child in ipairs(Map:GetChildren()) do
-            if child:IsA("Folder") and child.Name:lower():find("Generator") then
+            if child:IsA("Folder") and child.Name:lower():find("generator") then
                 MapGen = child
-                print(MapGen:GetFullName())
                 break
             end
         end
@@ -147,38 +146,37 @@ local function getClosestGen()
         end
 
         for _, point in ipairs(model:GetDescendants()) do
-
-        if not point.Name:lower():find("GeneratorPoint") then
-            continue
-        end
-
-        -- IsReparing também é opcional
-        local repairing = point:GetAttribute("IsReparing")
-
-        if repairing == true then
-            continue
-        end
-
-        local position
-
-        if point:IsA("BasePart") then
-            position = point.Position
-
-        elseif point:IsA("Attachment") then
-            position = point.WorldPosition
-        end
-
-        if position then
-            local distance = (root.Position - position).Magnitude
-
-            if distance < closestDistance then
-                closestDistance = distance
-                closestGen = model
-                closestAction = point
+            if not point.Name:lower():find("generatorpoint") then
+                continue
             end
-        end
-    end
-    return closestGen, closestAction
+
+            local repairing = point:GetAttribute("IsReparing")
+
+            if repairing == true then
+                continue
+            end
+
+            local position
+
+            if point:IsA("BasePart") then
+                position = point.Position
+            elseif point:IsA("Attachment") then
+                position = point.WorldPosition
+            end
+
+            if position then
+                local distance = (root.Position - position).Magnitude
+
+                if distance < closestDistance then
+                    closestDistance = distance
+                    closestGen = model
+                    closestAction = point
+                end
+            end
+        end -- fecha loop de point
+    end -- fecha loop de model
+
+    return closestGen, closestAction -- agora fora dos dois loops
 end
 
 local function MoveToPosition(character, targetPosition, maxAttempts)
