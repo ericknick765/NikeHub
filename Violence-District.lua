@@ -183,7 +183,7 @@ local function getClosestGen()
     end -- fecha loop de model
 
     print(closestGen,closestAction)
-    
+
     return closestGen, closestAction -- agora fora dos dois loops
 end
 
@@ -214,24 +214,30 @@ local function filterWaypoints(waypoints)
 end
 
 
-local function MoveToPosition(character, targetPosition, maxAttempts)
+local function MoveToPosition(character, targetPosition, maxAttempts, callback)
     maxAttempts = maxAttempts or 3
 
     local humanoid = character:FindFirstChildOfClass("Humanoid")
     local root = character:FindFirstChild("HumanoidRootPart")
 
     if not humanoid or not root then
+        if callback then
+            callback(false)
+        end
         return false
     end
 
     for attempt = 1, maxAttempts do
 
         if not character.Parent or humanoid.Health <= 0 then
+            if callback then
+                callback(false)
+            end
             return false
         end
 
         local path = PathfindingService:CreatePath({
-            AgentRadius = 2,
+            AgentRadius = 2.5,
             AgentHeight = 5,
             AgentCanJump = false,
             AgentCanClimb = false,
@@ -244,6 +250,9 @@ local function MoveToPosition(character, targetPosition, maxAttempts)
 
         if not success then
             warn("Erro no Pathfinding:", err)
+            if callback then
+                callback(false)
+            end
             return false
         end
 
@@ -308,12 +317,18 @@ local function MoveToPosition(character, targetPosition, maxAttempts)
         blockedConnection:Disconnect()
 
         if not failed then
+            if callback then
+                callback(true)
+            end
             return true
         end
 
-        task.wait(0.1)
+        task.wait(0.4)
     end
 
+    if callback then
+        callback(false)
+    end
     return false
 end
 
@@ -335,7 +350,14 @@ local button = sector3.element('Button', 'Walk to Generator', nil, function()
     end
 
     if targetPosition then
-        MoveToPosition(LocalPlayer.Character, targetPosition)
+        MoveToPosition(LocalPlayer.Character, targetPosition,3,function(success)
+            if success then
+                print("Ir ate gerador deu certo e fez açao")
+                TriggerMobileButton()
+            else
+                print("Ir ate gerador falhou")
+            end
+        end)
     end
 end)
 
