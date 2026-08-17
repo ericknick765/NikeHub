@@ -310,8 +310,6 @@ local function MoveToPosition(character, targetPosition, maxAttempts, callback)
             if failed then
                 break
             end
-
-            TriggerMobileButton()
         end
 
         blockedConnection:Disconnect()
@@ -323,7 +321,7 @@ local function MoveToPosition(character, targetPosition, maxAttempts, callback)
             return true
         end
 
-        task.wait(0.4)
+        task.wait(0.1)
     end
 
     if callback then
@@ -350,12 +348,9 @@ local button = sector3.element('Button', 'Walk to Generator', nil, function()
     end
 
     if targetPosition then
-        MoveToPosition(LocalPlayer.Character, targetPosition,3,function(success)
+        MoveToPosition(LocalPlayer.Character, targetPosition, 3, function(success)
             if success then
-                print("Ir ate gerador deu certo e fez açao")
                 TriggerMobileButton()
-            else
-                print("Ir ate gerador falhou")
             end
         end)
     end
