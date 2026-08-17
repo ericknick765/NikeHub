@@ -82,7 +82,6 @@ local function AutoSkillCheck()
                 return
             end
 
-            -- detecta novo check pela mudança do goal, sem precisar de wait
             if math.abs(goal.Rotation - lastGoal) > 1 then
                 lastGoal = goal.Rotation
                 triggered = false
@@ -98,6 +97,7 @@ local function AutoSkillCheck()
                 triggered = true
                 TriggerMobileButton()
             end
+            
         end)
 
         if VisibilityConnection then VisibilityConnection:Disconnect() end
