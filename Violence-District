@@ -74,6 +74,8 @@ local function AutoSkillCheck()
         local triggered = false
         local lastGoal = goal.Rotation
 
+        local OFFSET = 10
+
         if HeartbeatConnection then HeartbeatConnection:Disconnect() end
         HeartbeatConnection = RunService.Heartbeat:Connect(function()
             if not (LocalPlayer.Team and LocalPlayer.Team.Name == "Survivors" and check.Visible) then
@@ -88,12 +90,11 @@ local function AutoSkillCheck()
 
             if triggered then return end
 
-            local lr, gr = line.Rotation % 360, goal.Rotation % 360
+            local lr, gr = line.Rotation % 360, (goal.Rotation + OFFSET) % 360
             local ss, se = (gr + 101) % 360, (gr + 115) % 360
             local inZone = (ss > se and (lr >= ss or lr <= se)) or (lr >= ss and lr <= se)
 
             if inZone then
-                task.wait(0.2)
                 triggered = true
                 TriggerMobileButton()
             end
@@ -126,7 +127,7 @@ local function getClosestGen()
 
     for _, model in ipairs(MapGen:GetChildren()) do
         if model:IsA("Model") then
-            
+
             if model:GetAttribute("RepairProgress") >= 100 then
                 continue
             end
