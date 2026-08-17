@@ -74,7 +74,7 @@ local function AutoSkillCheck()
         local triggered = false
         local lastGoal = goal.Rotation
 
-        local OFFSET = Random.new():NextNumber(1, 15)
+        local OFFSET = 0 or 20
 
         if HeartbeatConnection then HeartbeatConnection:Disconnect() end
         HeartbeatConnection = RunService.Heartbeat:Connect(function()
@@ -118,7 +118,6 @@ local function getClosestGen()
     local root = character and character:FindFirstChild("HumanoidRootPart")
 
     if not MapGen or not root then
-        warn("Map ou Generators não encontrado")
         return nil, nil
     end
 
@@ -131,14 +130,22 @@ local function getClosestGen()
             continue
         end
 
+        -- RepairProgress é opcional
         local progress = model:GetAttribute("RepairProgress")
 
-        if progress and progress >= 100 then
+        -- Só ignora se realmente existir e estiver em 100+
+        if progress ~= nil and progress >= 100 then
             continue
         end
 
+        -- Procura o Action dentro do gerador
         for _, point in ipairs(model:GetDescendants()) do
 
+            if point.Name ~= "Action" then
+                continue
+            end
+
+            -- IsReparing também é opcional
             local repairing = point:GetAttribute("IsReparing")
 
             if repairing == true then
@@ -247,7 +254,7 @@ local function MoveToPosition(character, targetPosition, maxAttempts)
             return true
         end
 
-        task.wait(0.1)
+        task.wait(0.4)
     end
 
     return false
