@@ -349,7 +349,7 @@ local button = sector3.element('Button', 'Walk to Generator', nil, function()
     if targetPosition then
         MoveToPosition(LocalPlayer.Character, targetPosition, 3, function(success)
             if success then
-                task.delay(1, TriggerMobileButton())
+                TriggerMobileButton()
             end
         end)
     end
