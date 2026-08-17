@@ -136,7 +136,9 @@ local function getClosestGen()
     return closestGen, closestAction
 end
 
-local function MoveToPosition(character, targetPosition)
+local function MoveToPosition(character, targetPosition, maxAttempts)
+    maxAttempts = maxAttempts or 3
+
     local humanoid = character:FindFirstChildOfClass("Humanoid")
     local root = character:FindFirstChild("HumanoidRootPart")
 
@@ -144,36 +146,78 @@ local function MoveToPosition(character, targetPosition)
         return false
     end
 
-    local path = PathfindingService:CreatePath({
-        AgentRadius = 3,
-        AgentHeight = 5,
-        AgentCanJump = false,
-        AgentCanClimb = false,
-        WaypointSpacing = 5,
-    })
+    for attempt = 1, maxAttempts do
 
-    path:ComputeAsync(root.Position, targetPosition)
-
-    if path.Status ~= Enum.PathStatus.Success then
-        warn("Não foi possível encontrar um caminho")
-        return false
-    end
-
-    for _, waypoint in ipairs(path:GetWaypoints()) do
-        if waypoint.Action == Enum.PathWaypointAction.Jump then
-            humanoid.Jump = true
-        end
-
-        humanoid:MoveTo(waypoint.Position)
-
-        local reached = humanoid.MoveToFinished:Wait()
-
-        if not reached then
+        if not character.Parent or humanoid.Health <= 0 then
             return false
         end
+
+        local path = PathfindingService:CreatePath({
+            AgentRadius = 3,
+            AgentHeight = 5,
+            AgentCanJump = false,
+            AgentCanClimb = false,
+            WaypointSpacing = 4,
+        })
+
+        local success, err = pcall(function()
+            path:ComputeAsync(root.Position, targetPosition)
+        end)
+
+        if not success then
+            warn("Erro no Pathfinding:", err)
+            return false
+        end
+
+        if path.Status ~= Enum.PathStatus.Success then
+            task.wait(0.2)
+            continue
+        end
+
+        local waypoints = path:GetWaypoints()
+
+        local blocked = false
+
+        local blockedConnection = path.Blocked:Connect(function()
+            blocked = true
+        end)
+
+        local failed = false
+
+        for _, waypoint in ipairs(waypoints) do
+
+            if not character.Parent or humanoid.Health <= 0 then
+                failed = true
+                break
+            end
+
+            if blocked then
+                failed = true
+                break
+            end
+
+            humanoid:MoveTo(waypoint.Position)
+
+            local reached = humanoid.MoveToFinished:Wait()
+
+            TriggerMobileButton()
+
+            if not reached then
+                failed = true
+                break
+            end
+        end
+
+        blockedConnection:Disconnect()
+
+        if not failed then
+            return true
+        end
+
+        task.wait(0.1)
     end
 
-    return true
+    return false
 end
 
 -- // Elements \\ -- (Type, Name, State, Callback)
