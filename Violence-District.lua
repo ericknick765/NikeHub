@@ -58,13 +58,44 @@ local function GetActionTarget()
     return current
 end
 
-local function TriggerMobileButton()
+local function WaitForActionTarget(timeout)
+    timeout = timeout or 1 -- segundos
+    local interval = 0.05
+    local attempts = math.floor(timeout / interval)
+
     local b = GetActionTarget()
-    if b and b:IsA("GuiObject") then
-        local p, s, i = b.AbsolutePosition, b.AbsoluteSize, GuiService:GetGuiInset()
-        local cx, cy = p.X + (s.X/2) + i.X, p.Y + (s.Y/2) + i.Y
-        pcall(function() VirtualInputManager:SendTouchEvent(TouchID, 0, cx, cy) task.wait(0.01) VirtualInputManager:SendTouchEvent(TouchID, 2, cx, cy) end)
+    local tries = 0
+
+    while (not b or not b:IsA("GuiObject")) and tries < attempts do
+        task.wait(interval)
+        b = GetActionTarget()
+        tries += 1
     end
+
+    if b and b:IsA("GuiObject") then
+        return b
+    end
+
+    return nil
+end
+
+local function TriggerMobileButton(timeout)
+    local b = WaitForActionTarget(timeout)
+
+    if not b then
+        return false
+    end
+
+    local p, s, i = b.AbsolutePosition, b.AbsoluteSize, GuiService:GetGuiInset()
+    local cx, cy = p.X + (s.X / 2) + i.X, p.Y + (s.Y / 2) + i.Y
+
+    pcall(function()
+        VirtualInputManager:SendTouchEvent(TouchID, 0, cx, cy)
+        task.wait(0.01)
+        VirtualInputManager:SendTouchEvent(TouchID, 2, cx, cy)
+    end)
+
+    return true
 end
 
 local function AutoSkillCheck()
@@ -98,7 +129,7 @@ local function AutoSkillCheck()
 
             if inZone then
                 triggered = true
-                TriggerMobileButton()
+                TriggerMobileButton(0.1)
             end
             
         end)
@@ -356,8 +387,7 @@ local button = sector3.element('Button', 'Walk to Generator', nil, function()
     if targetPosition then
         MoveToPosition(LocalPlayer.Character, targetPosition, 3, function(success)
             if success then
-                task.wait(1)
-                TriggerMobileButton()
+                TriggerMobileButton(1)
             end
         end)
     end
