@@ -136,7 +136,7 @@ local function getClosestGen()
 
     for _, model in ipairs(MapGen:GetChildren()) do
         if model:IsA("Model") then
-            if model:GetAttribute("RepairProgress") == 100 then return end
+            if model:GetAttribute("RepairProgress") == 100 then continue end
 
             for _, point in ipairs(model:GetChildren()) do
                 if point:GetAttribute("IsReparing") == true then
