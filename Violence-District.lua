@@ -182,6 +182,33 @@ local function getClosestGen()
     return closestGen, closestAction -- agora fora dos dois loops
 end
 
+local function filterWaypoints(waypoints)
+    if #waypoints <= 2 then
+        return waypoints
+    end
+
+    local filtered = {waypoints[1]}
+
+    for i = 2, #waypoints - 1 do
+        local prev = filtered[#filtered].Position
+        local curr = waypoints[i].Position
+        local nextPoint = waypoints[i + 1].Position
+
+        local dir1 = (curr - prev).Unit
+        local dir2 = (nextPoint - curr).Unit
+
+        -- se a direção muda pouco, pula esse waypoint (é quase uma linha reta)
+        if dir1:Dot(dir2) < 0.98 then
+            table.insert(filtered, waypoints[i])
+        end
+    end
+
+    table.insert(filtered, waypoints[#waypoints])
+
+    return filtered
+end
+
+
 local function MoveToPosition(character, targetPosition, maxAttempts)
     maxAttempts = maxAttempts or 3
 
@@ -199,11 +226,11 @@ local function MoveToPosition(character, targetPosition, maxAttempts)
         end
 
         local path = PathfindingService:CreatePath({
-            AgentRadius = 2, -- mais próximo do tamanho real do personagem
+            AgentRadius = 2,
             AgentHeight = 5,
             AgentCanJump = false,
             AgentCanClimb = false,
-            WaypointSpacing = 2, -- waypoints mais próximos = curvas mais suaves
+            WaypointSpacing = 5,
         })
 
         local success, err = pcall(function()
@@ -220,7 +247,7 @@ local function MoveToPosition(character, targetPosition, maxAttempts)
             continue
         end
 
-        local waypoints = path:GetWaypoints()
+        local waypoints = filterWaypoints(path:GetWaypoints())
         local blocked = false
 
         local blockedConnection = path.Blocked:Connect(function()
@@ -243,10 +270,9 @@ local function MoveToPosition(character, targetPosition, maxAttempts)
 
             humanoid:MoveTo(waypoint.Position)
 
-            -- espera chegar perto o suficiente, sem exigir parada total
-            local reachedThreshold = 3 -- studs de tolerância
+            local reachedThreshold = 5
             local startTime = os.clock()
-            local timeout = 3 -- evita travar pra sempre se algo der errado
+            local timeout = 3
 
             while (root.Position - waypoint.Position).Magnitude > reachedThreshold do
                 if not character.Parent or humanoid.Health <= 0 then
@@ -280,7 +306,7 @@ local function MoveToPosition(character, targetPosition, maxAttempts)
             return true
         end
 
-        task.wait(0.4)
+        task.wait(0.1)
     end
 
     return false
