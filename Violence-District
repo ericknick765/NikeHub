@@ -148,38 +148,36 @@ local function getClosestGen()
 
         for _, point in ipairs(model:GetDescendants()) do
 
-            if point.Name ~= "Action" then
-                continue
-            end
+        if not point.Name:lower():find("GeneratorPoint") then
+            continue
+        end
 
-            -- IsReparing também é opcional
-            local repairing = point:GetAttribute("IsReparing")
+        -- IsReparing também é opcional
+        local repairing = point:GetAttribute("IsReparing")
 
-            if repairing == true then
-                continue
-            end
+        if repairing == true then
+            continue
+        end
 
-            local position
+        local position
 
-            if point:IsA("BasePart") then
-                position = point.Position
+        if point:IsA("BasePart") then
+            position = point.Position
 
-            elseif point:IsA("Attachment") then
-                position = point.WorldPosition
-            end
+        elseif point:IsA("Attachment") then
+            position = point.WorldPosition
+        end
 
-            if position then
-                local distance = (root.Position - position).Magnitude
+        if position then
+            local distance = (root.Position - position).Magnitude
 
-                if distance < closestDistance then
-                    closestDistance = distance
-                    closestGen = model
-                    closestAction = point
-                end
+            if distance < closestDistance then
+                closestDistance = distance
+                closestGen = model
+                closestAction = point
             end
         end
     end
-
     return closestGen, closestAction
 end
 
