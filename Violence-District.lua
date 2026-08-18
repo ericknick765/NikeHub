@@ -33,7 +33,7 @@ local section = tab.new_section('Bruh XD')
 local section2 = tab.new_section(':DDD HI')
 local section3 = tab.new_section('Boss')
 
-local section10 = tab1.new_section('Esp')
+local section10 = tab1.new_section('Esps')
 
 local section20 = tab2.new_section('Teleports')
 
@@ -43,7 +43,7 @@ local section30 = tab3.new_section('Automatically')
 local sector = section.new_sector('OK', 'Left')
 local sector1 = section.new_sector('BRUHHHH', 'Right')
 
-local sector10 = section10.new_sector('Esp', 'Left')
+local sector10 = section10.new_sector('Killer Esp', 'Left')
 
 local sector2 = section20.new_sector('Portal Teleport','Right')
 
