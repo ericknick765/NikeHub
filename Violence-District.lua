@@ -62,13 +62,13 @@ local EspGenerators = false
 
 local config = {
     ["EspKillerColor"] = {
-       ["Color"] = Color3.fromRGB(255, 0, 0)
+       Color = Color3.fromRGB(255, 0, 0)
     },
     ["SurvivorsEspColor"] = {
-        ["Color"] = Color3.fromRGB(218, 255, 11)
+        Color = Color3.fromRGB(218, 255, 11)
     },
     ["GeneratorsEspColor"] = {
-        ["Color"] = Color3.fromRGB(0, 119, 255)
+        Color = Color3.fromRGB(0, 119, 255)
     }
 }
 
