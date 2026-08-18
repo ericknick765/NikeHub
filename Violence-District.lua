@@ -55,7 +55,7 @@ local SkillCheckGenerator = false
 local EspKiller = false
 
 local config{
-    "EspKillerColor" = Color3.new(0.839216, 0.031373, 0.031373),
+    "EspKillerColor" = Color3.fromRGB(255, 0, 0)
 }
 
 math.randomseed(os.time())
