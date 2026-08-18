@@ -187,7 +187,7 @@ function library.new(library_title, cfg_location)
             Size = UDim2.new(0, 50, 0, 50),
             Position = UDim2.new(0, 15, 1, -65),
             BackgroundColor3 = Color3.fromRGB(15, 15, 15),
-            Image = "rbxassetid://",
+            Image = "rbxassetid://8697533674",
         })
 
         library:create("UICorner", {CornerRadius = UDim.new(0.2, 0)}, ToggleBtn)
