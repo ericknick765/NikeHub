@@ -111,9 +111,10 @@ local sector1 = section.new_sector('BRUHHHH', 'Right')
 local sector10 = section10.new_sector('Killer Esp', 'Left')
 local sector11 = section10.new_sector('Survivors Esp', 'Left')
 
-local sector2 = section20.new_sector('Portal Teleport','Right')
+local sector20 = section20.new_sector('Portal Teleport','Right')
 
-local sector3 = section30.new_sector('Generator','Left')
+local sector30 = section30.new_sector('Generator','Left')
+local sector31 = section30.new_sector('Auto Parry','Left')
 
 --// Variables \\--
 
@@ -124,6 +125,8 @@ local ESP_NAME = "NIKE_ESP"
 local EspKiller = false
 local EspSurvivors = false
 local EspGenerators = false
+
+local AutoParry = false
 
 local config = {
     EspKillerColor = {
@@ -136,6 +139,10 @@ local config = {
 
     GeneratorsEspColor = {
         Color = Color3.fromRGB(0, 119, 255)
+    },
+    AutoParry = {
+        Distance = 4,
+        ParryDelay = 0.2
     }
 }
 
@@ -687,7 +694,7 @@ end
 
 -- // Elements \\ -- (Type, Name, State, Callback)
 
-local button = sector3.element('Button', 'Walk to Generator', nil, function()
+local button = sector30.element('Button', 'Walk to Generator', nil, function()
     local generator, action = getClosestGen()
 
     if not action then
@@ -717,8 +724,6 @@ local ToggleEspKiller = sector10.element('Toggle', 'Esp Killer', false, function
 end)
 
 ToggleEspKiller:add_color({Color = config.EspKillerColor.Color}, nil, function(v)
-    print(typeof(v))
-    print(typeof(v.Color))
     config.EspKillerColor.Color = v.Color
     UpdateEspColors()
 end)
@@ -729,20 +734,29 @@ local ToggleEspSurvivors = sector11.element('Toggle', 'Esp Survivors', false, fu
 end)
 
 ToggleEspSurvivors:add_color({Color = config.SurvivorsEspColor.Color}, nil, function(v)
-    print(typeof(v))
-    print(typeof(v.Color))
     config.SurvivorsEspColor.Color = v.Color
     UpdateEspColors()
 end)
 
-local button = sector3.element('Button', 'Walk Test', nil, function()
+local button = sector30.element('Button', 'Walk Test', nil, function()
     local Test = workspace:WaitForChild("ericknick765")
-
     MoveToPosition(LocalPlayer.Character, Test.HumanoidRootPart.Position)
 end)
 
-local ToggleAutoSkillCheck = sector3.element('Toggle', 'Auto Skill Check', false, function(v)
+local ToggleAutoSkillCheck = sector30.element('Toggle', 'Auto Skill Check', false, function(v)
     SkillCheckGenerator = v
+end)
+
+local SliderDistanceAutoParry = sector31.element('Slider', 'Slider', {default = {min = 1, max = 5, default = 4}}, function(v)
+   config.AutoParry.Distance = v.Slider
+end)
+
+local SliderDistanceAutoParry = sector31.element('Slider', 'Slider', {default = {min = 0, max = 1, default = 0.1}}, function(v)
+   config.AutoParry.ParryDelay = v.Slider
+end)
+
+local ToggleAutoParry = sector31.element('Toggle', 'Auto Parry', false, function(v)
+    AutoParry = v
 end)
 
 
