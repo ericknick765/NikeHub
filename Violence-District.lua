@@ -53,6 +53,9 @@ local sector3 = section30.new_sector('Generator','Left')
 --// Variables \\--
 
 local SkillCheckGenerator = false
+
+local ESP_NAME = "NIKE_ESP"
+
 local EspKiller = false
 local EspSurvivors = false
 local EspGenerators = false
@@ -72,65 +75,175 @@ local config = {
 math.randomseed(os.time())
 local opcoes = {5, 30}
 
-local function AddEsp(obj, action)
-    if not obj or not obj:IsA("Instance") then
+
+local function GetEspColor(action)
+    if action == "killer" then
+        return config.EspKillerColor.Color
+
+    elseif action == "survival" then
+        return config.SurvivorsEspColor.Color
+    end
+end
+
+local function RemoveEsp(character)
+    if not character then
         return
     end
 
-    if obj:FindFirstChild("NIKE_ESP") then
+    local esp = character:FindFirstChild(ESP_NAME)
+
+    if esp and esp:IsA("Highlight") then
+        esp:Destroy()
+    end
+end
+
+local function AddEsp(character, action)
+    if not character then
         return
     end
 
-    local colors = {
-        killer = config.EspKillerColor.Color,
-        survivors = config.SurvivorsEspColor.Color,
-        generators = config.GeneratorsEspColor.Color
-    }
+    if not character:IsA("Model") then
+        return
+    end
 
-    local fillColor = colors[action]
+    local color = GetEspColor(action)
 
-    if not fillColor then
+    if not color then
+        return
+    end
+
+    local esp = character:FindFirstChild(ESP_NAME)
+
+    -- Já existe → apenas atualiza
+    if esp then
+        if esp:IsA("Highlight") then
+            esp.FillColor = color
+            esp:SetAttribute("EspType", action)
+        end
+
         return
     end
 
     local EspCreate = Instance.new("Highlight")
-    EspCreate.Name = "NIKE_ESP"
 
+    EspCreate.Name = ESP_NAME
     EspCreate.DepthMode = Enum.HighlightDepthMode.AlwaysOnTop
 
-    EspCreate.FillColor = fillColor
+    EspCreate.FillColor = color
     EspCreate.FillTransparency = 0.5
 
     EspCreate.OutlineColor = Color3.fromRGB(255, 255, 255)
-    EspCreate.OutlineTransparency = 0.8
+    EspCreate.OutlineTransparency = 0.9
 
     EspCreate:SetAttribute("NIKE", true)
+    EspCreate:SetAttribute("EspType", action)
 
-    EspCreate.Parent = obj
+    EspCreate.Parent = character
 end
+
 
 local function UpdateEsp()
     local Killer
-    if EspKiller then
-        for _, player in Players:GetPlayers() do
-            if player.Team and player.Team.Name == "Killer" then
-                Killer = player
-                break
-            end
-        end
-        if Killer.Character then
-            AddEsp(Killer.Character,"killer")
+
+    for _, player in Players:GetPlayers() do
+        if player.Team and player.Team.Name == "Killer" then
+            Killer = player
+            break
         end
     end
 
-    if EspSurvivors then
-        for _, player in Players:GetPlayers() do
-            if player.Team and player.Team.Name == "Survivors" then
-                if player.Name == LocalPlayer.Name then continue end
-                AddEsp(player,"survivors")
+    for _, player in Players:GetPlayers() do
+
+        local character = player.Character
+
+        if character then
+
+            if EspKiller
+                and player == Killer
+                and player ~= LocalPlayer then
+
+                AddEsp(character, "killer")
+
+            else
+
+                local esp = character:FindFirstChild(ESP_NAME)
+
+                if esp and esp:GetAttribute("EspType") == "killer" then
+                    RemoveEsp(character)
+                end
+
             end
+
         end
+
     end
+
+    for _, player in Players:GetPlayers() do
+
+        local character = player.Character
+
+        if character then
+
+            if EspSurvivors
+                and player ~= LocalPlayer
+                and player.Team
+                and player.Team.Name == "Survivors" then
+
+                AddEsp(character, "survival")
+
+            else
+
+                local esp = character:FindFirstChild(ESP_NAME)
+
+                if esp and esp:GetAttribute("EspType") == "survival" then
+                    RemoveEsp(character)
+                end
+
+            end
+
+        end
+
+    end
+end
+
+local function UpdateEspColors()
+
+    for _, player in Players:GetPlayers() do
+
+        local character = player.Character
+
+        if not character then
+            continue
+        end
+
+        local esp = character:FindFirstChild(ESP_NAME)
+
+        if not esp or not esp:IsA("Highlight") then
+            continue
+        end
+
+        local espType = esp:GetAttribute("EspType")
+
+        if espType == "killer" then
+            esp.FillColor = config.EspKillerColor.Color
+
+        elseif espType == "survival" then
+            esp.FillColor = config.SurvivorsEspColor.Color
+        end
+
+    end
+end
+
+local function RemoveAllEsp()
+
+    for _, player in Players:GetPlayers() do
+
+        if player.Character then
+            RemoveEsp(player.Character)
+        end
+
+    end
+
 end
 
 local function GetActionTarget()
@@ -472,6 +585,7 @@ end)
 
 ToggleEspKiller:add_color({Color = Color3.fromRGB(255, 0, 0)}, nil, function(v)
     config.EspKillerColor.Color = v
+    UpdateEspColors()
 end)
 
 local ToggleEspSurvivors = sector11.element('Toggle', 'Esp Survivors', false, function(v)
@@ -481,8 +595,9 @@ local ToggleEspSurvivors = sector11.element('Toggle', 'Esp Survivors', false, fu
     end
 end)
 
-ToggleEspSurvivors:add_color({Color = Color3.fromRGB(255, 0, 0)}, nil, function(v)
+ToggleEspSurvivors:add_color({Color = Color3.fromRGB(198, 252, 2)}, nil, function(v)
     config.SurvivorsEspColor.Color = v
+    UpdateEspColors()
 end)
 
 local button = sector3.element('Button', 'Walk Test', nil, function()
