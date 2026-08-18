@@ -82,7 +82,12 @@ local function GetEspColor(action)
 
     elseif action == "survival" then
         return config.SurvivorsEspColor.Color
+
+    elseif action == "generator" then
+        return config.GeneratorsEspColor.Color
     end
+
+    return nil
 end
 
 local function RemoveEsp(character)
@@ -98,11 +103,7 @@ local function RemoveEsp(character)
 end
 
 local function AddEsp(character, action)
-    if not character then
-        return
-    end
-
-    if not character:IsA("Model") then
+    if not character or not character:IsA("Model") then
         return
     end
 
@@ -114,37 +115,34 @@ local function AddEsp(character, action)
 
     local esp = character:FindFirstChild(ESP_NAME)
 
-    -- Já existe → apenas atualiza
-    if esp then
-        if esp:IsA("Highlight") then
-            esp.FillColor = color
-            esp:SetAttribute("EspType", action)
-        end
-
+    -- Já existe
+    if esp and esp:IsA("Highlight") then
+        esp.FillColor = color
+        esp:SetAttribute("EspType", action)
         return
     end
 
-    local EspCreate = Instance.new("Highlight")
+    local newEsp = Instance.new("Highlight")
 
-    EspCreate.Name = ESP_NAME
-    EspCreate.DepthMode = Enum.HighlightDepthMode.AlwaysOnTop
+    newEsp.Name = ESP_NAME
+    newEsp.DepthMode = Enum.HighlightDepthMode.AlwaysOnTop
 
-    EspCreate.FillColor = color
-    EspCreate.FillTransparency = 0.5
+    newEsp.FillColor = color
+    newEsp.FillTransparency = 0.5
 
-    EspCreate.OutlineColor = Color3.fromRGB(255, 255, 255)
-    EspCreate.OutlineTransparency = 0.9
+    newEsp.OutlineColor = Color3.fromRGB(255, 255, 255)
+    newEsp.OutlineTransparency = 0.9
 
-    EspCreate:SetAttribute("NIKE", true)
-    EspCreate:SetAttribute("EspType", action)
+    newEsp:SetAttribute("NIKE", true)
+    newEsp:SetAttribute("EspType", action)
 
-    EspCreate.Parent = character
+    newEsp.Parent = character
 end
-
 
 local function UpdateEsp()
     local Killer
 
+    -- Procura o Killer atual
     for _, player in Players:GetPlayers() do
         if player.Team and player.Team.Name == "Killer" then
             Killer = player
@@ -152,64 +150,54 @@ local function UpdateEsp()
         end
     end
 
-    for _, player in Players:GetPlayers() do
-
-        local character = player.Character
-
-        if character then
-
-            if EspKiller
-                and player == Killer
-                and player ~= LocalPlayer then
-
-                AddEsp(character, "killer")
-
-            else
-
-                local esp = character:FindFirstChild(ESP_NAME)
-
-                if esp and esp:GetAttribute("EspType") == "killer" then
-                    RemoveEsp(character)
-                end
-
-            end
-
-        end
-
-    end
 
     for _, player in Players:GetPlayers() do
-
         local character = player.Character
 
-        if character then
-
-            if EspSurvivors
-                and player ~= LocalPlayer
-                and player.Team
-                and player.Team.Name == "Survivors" then
-
-                AddEsp(character, "survival")
-
-            else
-
-                local esp = character:FindFirstChild(ESP_NAME)
-
-                if esp and esp:GetAttribute("EspType") == "survival" then
-                    RemoveEsp(character)
-                end
-
-            end
-
+        if not character then
+            continue
         end
 
+        local esp = character:FindFirstChild(ESP_NAME)
+        local espType = esp and esp:GetAttribute("EspType")
+
+
+        -- =========================
+        -- KILLER
+        -- =========================
+
+        if player == Killer
+            and player ~= LocalPlayer
+            and EspKiller then
+
+            AddEsp(character, "killer")
+
+        elseif espType == "killer" then
+
+            RemoveEsp(character)
+        end
+
+
+        -- =========================
+        -- SURVIVOR
+        -- =========================
+
+        if player ~= LocalPlayer
+            and player.Team
+            and player.Team.Name == "Survivors"
+            and EspSurvivors then
+
+            AddEsp(character, "survival")
+
+        elseif espType == "survival" then
+
+            RemoveEsp(character)
+        end
     end
 end
 
 local function UpdateEspColors()
-
     for _, player in Players:GetPlayers() do
-
         local character = player.Character
 
         if not character then
@@ -229,22 +217,44 @@ local function UpdateEspColors()
 
         elseif espType == "survival" then
             esp.FillColor = config.SurvivorsEspColor.Color
-        end
 
+        elseif espType == "generator" then
+            esp.FillColor = config.GeneratorsEspColor.Color
+        end
     end
 end
 
 local function RemoveAllEsp()
-
     for _, player in Players:GetPlayers() do
-
         if player.Character then
             RemoveEsp(player.Character)
         end
-
     end
-
 end
+
+local function SetupPlayer(player)
+    player.CharacterAdded:Connect(function(character)
+        character:WaitForChild("Humanoid", 5)
+        task.wait(0.1)
+        UpdateEsp()
+    end)
+    player:GetPropertyChangedSignal("Team"):Connect(function()
+        UpdateEsp()
+    end)
+end
+
+for _, player in Players:GetPlayers() do
+    SetupPlayer(player)
+end
+
+Players.PlayerAdded:Connect(function(player)
+    SetupPlayer(player)
+    UpdateEsp()
+end)
+
+Players.PlayerRemoving:Connect(function()
+    UpdateEsp()
+end)
 
 local function GetActionTarget()
     local current = PlayerGui
@@ -578,24 +588,20 @@ end)
 
 local ToggleEspKiller = sector10.element('Toggle', 'Esp Killer', false, function(v)
     EspKiller = v
-    if EspKiller then
-        UpdateEsp()
-    end
+    UpdateEsp()
 end)
 
-ToggleEspKiller:add_color({Color = Color3.fromRGB(255, 0, 0)}, nil, function(v)
+ToggleEspKiller:add_color({Color = config.EspKillerColor.Color)}, nil, function(v)
     config.EspKillerColor.Color = v
     UpdateEspColors()
 end)
 
 local ToggleEspSurvivors = sector11.element('Toggle', 'Esp Survivors', false, function(v)
     EspSurvivors = v
-    if EspSurvivors then
-        UpdateEsp()
-    end
+    UpdateEsp()
 end)
 
-ToggleEspSurvivors:add_color({Color = Color3.fromRGB(198, 252, 2)}, nil, function(v)
+ToggleEspSurvivors:add_color({Color = config.SurvivorsEspColor.Color)}, nil, function(v)
     config.SurvivorsEspColor.Color = v
     UpdateEspColors()
 end)
