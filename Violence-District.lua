@@ -44,6 +44,7 @@ local sector = section.new_sector('OK', 'Left')
 local sector1 = section.new_sector('BRUHHHH', 'Right')
 
 local sector10 = section10.new_sector('Killer Esp', 'Left')
+local sector11 = section10.new_sector('Survivors Esp', 'Left')
 
 local sector2 = section20.new_sector('Portal Teleport','Right')
 
@@ -53,19 +54,83 @@ local sector3 = section30.new_sector('Generator','Left')
 
 local SkillCheckGenerator = false
 local EspKiller = false
+local EspSurvivors = false
+local EspGenerators = false
 
 local config = {
     ["EspKillerColor"] = {
        ["Color"] = Color3.fromRGB(255, 0, 0)
+    },
+    ["SurvivorsEspColor"] = {
+        ["Color"] = Color3.fromRGB(218, 255, 11)
+    },
+    ["GeneratorsEspColor"] = {
+        ["Color"] = Color3.fromRGB(0, 119, 255)
     }
 }
 
 math.randomseed(os.time())
 local opcoes = {5, 30}
 
-local function UpdateEsp()
-    if not EspKiller then return end
+local function AddEsp(obj, action)
+    if not obj or not obj:IsA("Instance") then
+        return
+    end
 
+    if obj:FindFirstChild("NIKE_ESP") then
+        return
+    end
+
+    local colors = {
+        killer = config.EspKillerColor.Color,
+        survivors = config.SurvivorsEspColor.Color,
+        generators = config.GeneratorsEspColor.Color
+    }
+
+    local fillColor = colors[action]
+
+    if not fillColor then
+        return
+    end
+
+    local EspCreate = Instance.new("Highlight")
+    EspCreate.Name = "NIKE_ESP"
+
+    EspCreate.DepthMode = Enum.HighlightDepthMode.AlwaysOnTop
+
+    EspCreate.FillColor = fillColor
+    EspCreate.FillTransparency = 0.5
+
+    EspCreate.OutlineColor = Color3.fromRGB(255, 255, 255)
+    EspCreate.OutlineTransparency = 0.8
+
+    EspCreate:SetAttribute("NIKE", true)
+
+    EspCreate.Parent = obj
+end
+
+local function UpdateEsp()
+    local Killer
+    if EspKiller then
+        for _, player in Players:GetPlayers() do
+            if player.Team and player.Team.Name == "Killer" then
+                Killer = player
+                break
+            end
+        end
+        if Killer.Character then
+            AddEsp(Killer.Character,"killer")
+        end
+    end
+
+    if EspSurvivors then
+        for _, player in Players:GetPlayers() do
+            if player.Team and player.Team.Name == "Survivors" then
+                if player.Name == LocalPlayer.Name then continue end
+                AddEsp(player,"survivors")
+            end
+        end
+    end
 end
 
 local function GetActionTarget()
@@ -400,10 +465,24 @@ end)
 
 local ToggleEspKiller = sector10.element('Toggle', 'Esp Killer', false, function(v)
     EspKiller = v
+    if EspKiller then
+        UpdateEsp()
+    end
 end)
 
 ToggleEspKiller:add_color({Color = Color3.fromRGB(255, 0, 0)}, nil, function(v)
-   config.EspKillerColor.Color = v
+    config.EspKillerColor.Color = v
+end)
+
+local ToggleEspSurvivors = sector11.element('Toggle', 'Esp Survivors', false, function(v)
+    EspSurvivors = v
+    if EspSurvivors then
+        UpdateEsp()
+    end
+end)
+
+ToggleEspSurvivors:add_color({Color = Color3.fromRGB(255, 0, 0)}, nil, function(v)
+    config.SurvivorsEspColor.Color = v
 end)
 
 local button = sector3.element('Button', 'Walk Test', nil, function()
