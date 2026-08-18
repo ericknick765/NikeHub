@@ -80,6 +80,7 @@ local LastFullESPRefresh = 0
 
 local TouchID = 8822
 local ActionPath = "Survivor-mob.Controls.action.check"
+local UseItemPath ="Survivor-mob.Controls.Gui-mob"
 local HeartbeatConnection = nil
 local VisibilityConnection = nil
 local IndicatorGui = nil
@@ -334,7 +335,34 @@ local function GetActionTarget()
     return current
 end
 
+local function GetUseItemTarget()
+    local current = PlayerGui
+    for segment in string.gmatch(UseItemPath, "[^%.]+") do current = current and current:FindFirstChild(segment) end
+    return current
+end
+
 local function WaitForActionTarget(timeout)
+    timeout = timeout or 1 -- segundos
+    local interval = 0.05
+    local attempts = math.floor(timeout / interval)
+
+    local b = GetUseItemTarget()
+    local tries = 0
+
+    while (not b or not b:IsA("GuiObject")) and tries < attempts do
+        task.wait(interval)
+        b = GetUseItemTarget()
+        tries += 1
+    end
+
+    if b and b:IsA("GuiObject") then
+        return b
+    end
+
+    return nil
+end
+
+local function WaitForUseItemTarget(timeout)
     timeout = timeout or 1 -- segundos
     local interval = 0.05
     local attempts = math.floor(timeout / interval)
@@ -363,6 +391,25 @@ local function TriggerMobileButton(timeout)
     end
 
     local p, s, i = b.AbsolutePosition, b.AbsoluteSize, GuiService:GetGuiInset()
+    local cx, cy = p.X + (s.X / 2) + i.X, p.Y + (s.Y / 2) + i.Y
+
+    pcall(function()
+        VirtualInputManager:SendTouchEvent(TouchID, 0, cx, cy)
+        task.wait(0.01)
+        VirtualInputManager:SendTouchEvent(TouchID, 2, cx, cy)
+    end)
+
+    return true
+end
+
+local function UseItemMobileButton(timeout)
+    local b = WaitForUseItemTarget(timeout)
+
+    if not b then
+        return false
+    end
+
+    local p, s, i = b.AbsolutePosition, b.AbsoluteSize, GuiService:GetUseItemTarget()
     local cx, cy = p.X + (s.X / 2) + i.X, p.Y + (s.Y / 2) + i.Y
 
     pcall(function()
@@ -746,18 +793,21 @@ local ToggleAutoSkillCheck = sector30.element('Toggle', 'Auto Skill Check', fals
     SkillCheckGenerator = v
 end)
 
-local SliderDistanceAutoParry = sector31.element('Slider', 'Slider', {default = {min = 1, max = 5, default = 4}}, function(v)
+local buttonParry = sector31.element('Button', 'Parry Test', nil, function()
+    UseItemMobileButton(0.1)
+end)
+
+local SliderDistanceAutoParry = sector31.element('Slider', 'Distance', {default = {min = 1, max = 5, default = 4}}, function(v)
    config.AutoParry.Distance = v
 end)
 
-local SliderDelayAutoParry = sector31.element('Slider', 'Slider', {default = {min = 0, max = 1, default = 0.1}}, function(v)
+local SliderDelayAutoParry = sector31.element('Slider', 'Delay', {default = {min = 0, max = 1, default = 0.1}}, function(v)
    config.AutoParry.ParryDelay = v
 end)
 
 local ToggleAutoParry = sector31.element('Toggle', 'Auto Parry', false, function(v)
     config.AutoParry.AutoParry = v
 end)
-
 
 
 task.spawn(function()
