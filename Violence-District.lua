@@ -54,8 +54,10 @@ local sector3 = section30.new_sector('Generator','Left')
 local SkillCheckGenerator = false
 local EspKiller = false
 
-local config{
-    "EspKillerColor" = Color3.fromRGB(255, 0, 0)
+local config = {
+    ["EspKillerColor"] = {
+       ["Color"] = Color3.fromRGB(255, 0, 0)
+    }
 }
 
 math.randomseed(os.time())
@@ -401,7 +403,7 @@ local ToggleEspKiller = sector10.element('Toggle', 'Esp Killer', false, function
 end)
 
 ToggleEspKiller:add_color({Color = Color3.fromRGB(255, 0, 0)}, nil, function(v)
-   config.EspKillerColor = v
+   config.EspKillerColor.Color = v
 end)
 
 local button = sector3.element('Button', 'Walk Test', nil, function()
