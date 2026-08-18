@@ -78,13 +78,6 @@ local ActiveGenerators = {}
 local LastUpdateTick = 0
 local LastFullESPRefresh = 0
 
-local TouchID = 8822
-local ActionPath = "Survivor-mob.Controls.action.check"
-local UseItemPath ="Survivor-mob.Controls.Gui-mob"
-local HeartbeatConnection = nil
-local VisibilityConnection = nil
-local IndicatorGui = nil
-
 -- // Window \\ --
 local window = library.new('Nike Hub', 'leadmarker')
 
@@ -118,6 +111,13 @@ local sector30 = section30.new_sector('Generator','Left')
 local sector31 = section30.new_sector('Auto Parry','Left')
 
 --// Variables \\--
+
+local TouchID = 8822
+local ActionPath = "Survivor-mob.Controls.action.check"
+local UseItemPath ="Survivor-mob.Controls.Gui-mob"
+local HeartbeatConnection = nil
+local VisibilityConnection = nil
+local IndicatorGui = nil
 
 local SkillCheckGenerator = false
 
@@ -331,94 +331,103 @@ end)
 
 local function GetActionTarget()
     local current = PlayerGui
-    for segment in string.gmatch(ActionPath, "[^%.]+") do current = current and current:FindFirstChild(segment) end
+    for segment in string.gmatch(ActionPath, "[^%.]+") do
+        current = current and current:FindFirstChild(segment)
+    end
     return current
 end
 
 local function GetUseItemTarget()
     local current = PlayerGui
-    for segment in string.gmatch(UseItemPath, "[^%.]+") do current = current and current:FindFirstChild(segment) end
+    for segment in string.gmatch(UseItemPath, "[^%.]+") do
+        current = current and current:FindFirstChild(segment)
+    end
     return current
 end
 
 local function WaitForActionTarget(timeout)
-    timeout = timeout or 1 -- segundos
+    timeout = timeout or 1
     local interval = 0.05
     local attempts = math.floor(timeout / interval)
-
-    local b = GetUseItemTarget()
+    local target = GetActionTarget()
     local tries = 0
-
-    while (not b or not b:IsA("GuiObject")) and tries < attempts do
+    while
+        (not target or not target:IsA("GuiObject"))
+        and tries < attempts
+    do
         task.wait(interval)
-        b = GetUseItemTarget()
+        target = GetActionTarget()
         tries += 1
     end
-
-    if b and b:IsA("GuiObject") then
-        return b
+    if target and target:IsA("GuiObject") then
+        return target
     end
-
     return nil
 end
 
 local function WaitForUseItemTarget(timeout)
-    timeout = timeout or 1 -- segundos
+    timeout = timeout or 1
     local interval = 0.05
     local attempts = math.floor(timeout / interval)
-
-    local b = GetActionTarget()
+    local target = GetUseItemTarget()
     local tries = 0
-
-    while (not b or not b:IsA("GuiObject")) and tries < attempts do
+    while
+        (not target or not target:IsA("GuiObject"))
+        and tries < attempts
+    do
         task.wait(interval)
-        b = GetActionTarget()
+        target = GetUseItemTarget()
         tries += 1
     end
-
-    if b and b:IsA("GuiObject") then
-        return b
+    if target and target:IsA("GuiObject") then
+        return target
     end
-
     return nil
 end
 
 local function TriggerMobileButton(timeout)
-    local b = WaitForActionTarget(timeout)
 
-    if not b then
+    local button = WaitForActionTarget(timeout)
+
+    if not button then
         return false
     end
 
-    local p, s, i = b.AbsolutePosition, b.AbsoluteSize, GuiService:GetGuiInset()
-    local cx, cy = p.X + (s.X / 2) + i.X, p.Y + (s.Y / 2) + i.Y
+    local position = button.AbsolutePosition
+    local size = button.AbsoluteSize
+    local inset = GuiService:GetGuiInset()
 
-    pcall(function()
-        VirtualInputManager:SendTouchEvent(TouchID, 0, cx, cy)
+    local x = position.X + (size.X / 2) + inset.X
+    local y = position.Y + (size.Y / 2) + inset.Y
+
+    local success = pcall(function()
+        VirtualInputManager:SendTouchEvent(TouchID,0,x,y)
         task.wait(0.01)
-        VirtualInputManager:SendTouchEvent(TouchID, 2, cx, cy)
+        VirtualInputManager:SendTouchEvent(TouchID,2,x,y)
     end)
-
-    return true
+    return success
 end
 
 local function UseItemMobileButton(timeout)
-    local b = WaitForUseItemTarget(timeout)
+    local button = WaitForUseItemTarget(timeout)
 
-    if not b then
+    if not button then
         return false
     end
 
-    local p, s, i = b.AbsolutePosition, b.AbsoluteSize, GuiService:GetUseItemTarget()
-    local cx, cy = p.X + (s.X / 2) + i.X, p.Y + (s.Y / 2) + i.Y
+    local position = button.AbsolutePosition
+    local size = button.AbsoluteSize
+    local inset = GuiService:GetGuiInset()
 
-    pcall(function()
-        VirtualInputManager:SendTouchEvent(TouchID, 0, cx, cy)
+    local x = position.X + (size.X / 2) + inset.X
+    local y = position.Y + (size.Y / 2) + inset.Y
+
+    local success = pcall(function()
+        VirtualInputManager:SendTouchEvent(TouchID,0,x,y)
         task.wait(0.01)
-        VirtualInputManager:SendTouchEvent(TouchID, 2, cx, cy)
+        VirtualInputManager:SendTouchEvent(TouchID,2,x,y)
     end)
-
-    return true
+    return success
 end
 
 local function DisconnectConnection(connection)
