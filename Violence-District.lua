@@ -48,9 +48,19 @@ local sector3 = section30.new_sector('Generator','Left')
 --// Variables \\--
 
 local SkillCheckGenerator = false
+local EspKiller = false
+
+local config{
+    "EspKillerColor" = Color3.new(0.839216, 0.031373, 0.031373),
+}
 
 math.randomseed(os.time())
 local opcoes = {5, 30}
+
+local function UpdateEsp()
+    if not EspKiller then return end
+    
+end
 
 local function GetActionTarget()
     local current = PlayerGui
@@ -382,6 +392,14 @@ local button = sector3.element('Button', 'Walk to Generator', nil, function()
     end
 end)
 
+local ToggleEspKiller = sector.element('Toggle', 'Kill Aura', false, function(v)
+    EspKiller = v
+end)
+
+ToggleEspKiller:add_color({Color = Color3.fromRGB(255, 0, 0)}, nil, function(v)
+   config.EspKillerColor = v
+end)
+
 local button = sector3.element('Button', 'Walk Test', nil, function()
     local Test = workspace:WaitForChild("ericknick765")
 
@@ -391,6 +409,8 @@ end)
 local ToggleAutoSkillCheck = sector3.element('Toggle', 'Auto Skill Check', false, function(v)
     SkillCheckGenerator = v
 end)
+
+
 
 task.spawn(function()
     while task.wait(0.2) do
