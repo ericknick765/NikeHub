@@ -4,8 +4,59 @@ local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local VirtualInputManager = game:GetService("VirtualInputManager")
 local PathfindingService = game:GetService("PathfindingService")
+local CoreGui = game:GetService("CoreGui")
 local RunService = game:GetService("RunService")
 local GuiService = game:GetService("GuiService")
+
+local SessionName = "NIKE_HUB_SESSION"
+
+local OldSession = getgenv()[SessionName]
+
+if OldSession and OldSession.Destroy then
+    OldSession.Destroy()
+end
+
+-- Nova sessão
+local Session = {
+    Connections = {},
+    Running = true,
+}
+
+getgenv()[SessionName] = Session
+
+
+function Session:Connect(signal, callback)
+    if not self.Running then
+        return
+    end
+
+    local connection = signal:Connect(callback)
+
+    table.insert(self.Connections, connection)
+
+    return connection
+end
+
+
+function Session:Destroy()
+    if not self.Running then
+        return
+    end
+
+    self.Running = false
+
+    -- Desconecta tudo
+    for _, connection in ipairs(self.Connections) do
+        if connection and connection.Connected then
+            connection:Disconnect()
+        end
+    end
+
+    table.clear(self.Connections)
+    if getgenv()[SessionName] == self then
+        getgenv()[SessionName] = nil
+    end
+end
 
 local LocalPlayer = Players.LocalPlayer
 local PlayerGui = LocalPlayer:WaitForChild("PlayerGui")
@@ -220,26 +271,40 @@ local function RemoveAllEsp()
 end
 
 local function SetupPlayer(player)
-    player.CharacterAdded:Connect(function(character)
-        character:WaitForChild("Humanoid", 5)
-        task.wait(0.1)
+    Session:Connect(player.CharacterAdded, function(character)
+    character:WaitForChild("Humanoid", 5)
+
+    if not Session.Running then
+        return
+    end
+    task.wait(0.1)
+    UpdateEsp()
+
+    end)
+
+    Session:Connect(
+    player:GetPropertyChangedSignal("Team"),
+    function()
+        if not Session.Running then
+            return
+        end
+
         UpdateEsp()
     end)
-    player:GetPropertyChangedSignal("Team"):Connect(function()
-        UpdateEsp()
-    end)
+    
 end
 
 for _, player in Players:GetPlayers() do
     SetupPlayer(player)
 end
 
-Players.PlayerAdded:Connect(function(player)
+
+Session:Connect(Players.PlayerAdded, function(player)
     SetupPlayer(player)
     UpdateEsp()
 end)
 
-Players.PlayerRemoving:Connect(function()
+Session:Connect(Players.PlayerRemoving, function(player)
     UpdateEsp()
 end)
 
@@ -290,49 +355,106 @@ local function TriggerMobileButton(timeout)
 end
 
 local function AutoSkillCheck()
-    task.spawn(function()
-        local prompt = PlayerGui:WaitForChild("SkillCheckPromptGui", 10)
-        local check = prompt and prompt:WaitForChild("Check", 10)
-        if not check then return end
-        local line, goal = check:WaitForChild("Line"), check:WaitForChild("Goal")
+    if not Session.Running then
+        return
+    end
 
-        local triggered = false
-        local lastGoal = goal.Rotation
+    local prompt = PlayerGui:FindFirstChild("SkillCheckPromptGui")
+    if not prompt then
+        return
+    end
 
-        local OFFSET = opcoes[math.random(1, 2)]
+    local check = prompt:FindFirstChild("Check")
+    if not check then
+        return
+    end
 
-        if HeartbeatConnection then HeartbeatConnection:Disconnect() end
-        HeartbeatConnection = RunService.Heartbeat:Connect(function()
-            if not (LocalPlayer.Team and LocalPlayer.Team.Name == "Survivors" and check.Visible) then
+    local line = check:FindFirstChild("Line")
+    local goal = check:FindFirstChild("Goal")
+
+    if not line or not goal then
+        return
+    end
+
+    local triggered = false
+    local lastGoal = goal.Rotation
+
+    local OFFSET = opcoes[math.random(1, 2)]
+
+    -- Remove Heartbeat anterior
+    if HeartbeatConnection then
+        HeartbeatConnection:Disconnect()
+        HeartbeatConnection = nil
+    end
+
+    HeartbeatConnection = Session:Connect(
+        RunService.Heartbeat,
+        function()
+
+            if not Session.Running then
                 return
             end
+
+            if not (
+                LocalPlayer.Team
+                and LocalPlayer.Team.Name == "Survivors"
+                and check.Parent
+                and check.Visible
+            ) then
+                return
+            end
+
 
             if math.abs(goal.Rotation - lastGoal) > 1 then
                 lastGoal = goal.Rotation
                 triggered = false
             end
 
-            if triggered then return end
+            if triggered then
+                return
+            end
 
-            local lr, gr = line.Rotation % 360, (goal.Rotation + OFFSET) % 360
-            local ss, se = (gr + 101) % 360, (gr + 115) % 360
-            local inZone = (ss > se and (lr >= ss or lr <= se)) or (lr >= ss and lr <= se)
+            local lr = line.Rotation % 360
+            local gr = (goal.Rotation + OFFSET) % 360
+
+            local ss = (gr + 101) % 360
+            local se = (gr + 115) % 360
+
+            local inZone
+
+            if ss > se then
+                inZone = lr >= ss or lr <= se
+            else
+                inZone = lr >= ss and lr <= se
+            end
 
             if inZone then
                 triggered = true
+
                 TriggerMobileButton(0.1)
             end
-            
-        end)
+        end
+    )
 
-        if VisibilityConnection then VisibilityConnection:Disconnect() end
-        VisibilityConnection = check:GetPropertyChangedSignal("Visible"):Connect(function()
-            if not check.Visible and HeartbeatConnection then
-                HeartbeatConnection:Disconnect()
-                HeartbeatConnection = nil
+    if VisibilityConnection then
+        VisibilityConnection:Disconnect()
+        VisibilityConnection = nil
+    end
+
+    VisibilityConnection = Session:Connect(
+        check:GetPropertyChangedSignal("Visible"),
+        function()
+
+            if not check.Visible then
+
+                if HeartbeatConnection then
+                    HeartbeatConnection:Disconnect()
+                    HeartbeatConnection = nil
+                end
+
             end
-        end)
-    end)
+        end
+    )
 end
 
 local function getClosestGen()
@@ -610,7 +732,13 @@ end)
 
 
 task.spawn(function()
-    while task.wait(0.2) do
+    while Session.Running do
+        task.wait(0.2)
+
+        if not Session.Running then
+            break
+        end
+
         if SkillCheckGenerator then
             AutoSkillCheck()
         end

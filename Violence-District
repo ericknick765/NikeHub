@@ -21,7 +21,7 @@ if WhitelistPlayer[User.UserId] then
     print("Admin")
     carregar('https://raw.githubusercontent.com/ericknick765/NikeHub/refs/heads/main/Violence-District.lua')
 else
-    -- Versão Normal
+    -- Versão Normal (nao finalizado)
     print("Normal")
     carregar('https://raw.githubusercontent.com/ericknick765/NikeHub/refs/heads/main/Violence-District.lua')
 
