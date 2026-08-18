@@ -126,8 +126,6 @@ local EspKiller = false
 local EspSurvivors = false
 local EspGenerators = false
 
-local AutoParry = false
-
 local config = {
     EspKillerColor = {
         Color = Color3.fromRGB(255, 0, 0)
@@ -142,7 +140,8 @@ local config = {
     },
     AutoParry = {
         Distance = 4,
-        ParryDelay = 0.2
+        ParryDelay = 0.2,
+        AutoParry = false
     }
 }
 
@@ -748,15 +747,15 @@ local ToggleAutoSkillCheck = sector30.element('Toggle', 'Auto Skill Check', fals
 end)
 
 local SliderDistanceAutoParry = sector31.element('Slider', 'Slider', {default = {min = 1, max = 5, default = 4}}, function(v)
-   config.AutoParry.Distance = v.Slider
+   config.AutoParry.Distance = v
 end)
 
-local SliderDistanceAutoParry = sector31.element('Slider', 'Slider', {default = {min = 0, max = 1, default = 0.1}}, function(v)
-   config.AutoParry.ParryDelay = v.Slider
+local SliderDelayAutoParry = sector31.element('Slider', 'Slider', {default = {min = 0, max = 1, default = 0.1}}, function(v)
+   config.AutoParry.ParryDelay = v
 end)
 
 local ToggleAutoParry = sector31.element('Toggle', 'Auto Parry', false, function(v)
-    AutoParry = v
+    config.AutoParry.AutoParry = v
 end)
 
 
