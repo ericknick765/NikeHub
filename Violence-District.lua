@@ -1,4 +1,4 @@
-local library = loadstring(game:HttpGet('https://raw.githubusercontent.com/nickexeqq-sketch/SailorPiecePro/refs/heads/main/library.lua'))()
+local library = loadstring(game:HttpGet('https://raw.githubusercontent.com/ericknick765/NikeHub/refs/heads/main/Library/Library.lua'))()
 
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
@@ -39,6 +39,15 @@ end
 
 
 function Session:Destroy()
+
+    local oldGui = CoreGui:FindFirstChild("NIKE_HUB")
+    local oldbtn = CoreGui:FindFirstChild("MobileToggleGui")
+
+    if oldGui then
+        oldGui:Destroy()
+        oldbtn:Destroy()
+    end
+
     if not self.Running then
         return
     end
