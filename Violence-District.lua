@@ -195,7 +195,7 @@ local function AddEsp(character, action)
     newEsp.DepthMode = Enum.HighlightDepthMode.AlwaysOnTop
 
     newEsp.FillColor = color
-    newEsp.FillTransparency = 0.8
+    newEsp.FillTransparency = 0.3
 
     newEsp.OutlineColor = Color3.fromRGB(255, 255, 255)
     newEsp.OutlineTransparency = 0.9
