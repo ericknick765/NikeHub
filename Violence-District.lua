@@ -591,7 +591,7 @@ local ToggleEspKiller = sector10.element('Toggle', 'Esp Killer', false, function
     UpdateEsp()
 end)
 
-ToggleEspKiller:add_color({Color = config.EspKillerColor.Color}, nil, function(v)
+ToggleEspKiller:add_color({Color = Color3.fromRGB(255, 11, 11)}, nil, function(v)
     config.EspKillerColor.Color = v
     UpdateEspColors()
 end)
@@ -601,7 +601,7 @@ local ToggleEspSurvivors = sector11.element('Toggle', 'Esp Survivors', false, fu
     UpdateEsp()
 end)
 
-ToggleEspSurvivors:add_color({Color = config.SurvivorsEspColor.Color}, nil, function(v)
+ToggleEspSurvivors:add_color({Color = Color3.fromRGB(251, 255, 11)}, nil, function(v)
     config.SurvivorsEspColor.Color = v
     UpdateEspColors()
 end)
