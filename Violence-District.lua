@@ -13,10 +13,9 @@ local SessionName = "NIKE_HUB_SESSION"
 local OldSession = getgenv()[SessionName]
 
 if OldSession and OldSession.Destroy then
-    OldSession.Destroy()
+    OldSession:Destroy()
 end
 
--- Nova sessão
 local Session = {
     Connections = {},
     Running = true,
@@ -40,21 +39,14 @@ end
 
 function Session:Destroy()
 
-    local oldGui = CoreGui:FindFirstChild("NIKE_HUB")
-    local oldbtn = CoreGui:FindFirstChild("MobileToggleGui")
-
-    if oldGui then
-        oldGui:Destroy()
-        oldbtn:Destroy()
-    end
-
     if not self.Running then
         return
     end
 
+    print("Encerrando Nike Hub antigo...")
+
     self.Running = false
 
-    -- Desconecta tudo
     for _, connection in ipairs(self.Connections) do
         if connection and connection.Connected then
             connection:Disconnect()
@@ -62,9 +54,22 @@ function Session:Destroy()
     end
 
     table.clear(self.Connections)
+
+    local oldGui = CoreGui:FindFirstChild("NIKE_HUB")
+    if oldGui then
+        oldGui:Destroy()
+    end
+
+    local oldBtn = CoreGui:FindFirstChild("MobileToggleGui")
+    if oldBtn then
+        oldBtn:Destroy()
+    end
+
     if getgenv()[SessionName] == self then
         getgenv()[SessionName] = nil
     end
+
+    print("Nike Hub antigo encerrado!")
 end
 
 local LocalPlayer = Players.LocalPlayer
@@ -363,6 +368,12 @@ local function TriggerMobileButton(timeout)
     return true
 end
 
+local function DisconnectConnection(connection)
+    if connection and connection.Connected then
+        connection:Disconnect()
+    end
+end
+
 local function AutoSkillCheck()
     if not Session.Running then
         return
@@ -392,7 +403,7 @@ local function AutoSkillCheck()
 
     -- Remove Heartbeat anterior
     if HeartbeatConnection then
-        HeartbeatConnection:Disconnect()
+        DisconnectConnection(HeartbeatConnection)
         HeartbeatConnection = nil
     end
 
@@ -455,12 +466,8 @@ local function AutoSkillCheck()
         function()
 
             if not check.Visible then
-
-                if HeartbeatConnection then
-                    HeartbeatConnection:Disconnect()
-                    HeartbeatConnection = nil
-                end
-
+                DisconnectConnection(HeartbeatConnection)
+                HeartbeatConnection = nil
             end
         end
     )
