@@ -144,14 +144,12 @@ end
 local function UpdateEsp()
     local Killer
 
-    -- Procura o Killer atual
     for _, player in Players:GetPlayers() do
         if player.Team and player.Team.Name == "Killer" then
             Killer = player
             break
         end
     end
-
 
     for _, player in Players:GetPlayers() do
         local character = player.Character
@@ -160,39 +158,26 @@ local function UpdateEsp()
             continue
         end
 
-        local esp = character:FindFirstChild(ESP_NAME)
-        local espType = esp and esp:GetAttribute("EspType")
+        local wantedType
 
+        if player ~= LocalPlayer then
+            if EspKiller and player == Killer then
+                wantedType = "killer"
 
-        -- =========================
-        -- KILLER
-        -- =========================
+            elseif EspSurvivors
+                and player.Team
+                and player.Team.Name == "Survivors" then
 
-        if player == Killer
-            and player ~= LocalPlayer
-            and EspKiller then
-
-            AddEsp(character, "killer")
-
-        elseif espType == "killer" then
-
-            RemoveEsp(character)
+                wantedType = "survival"
+            end
         end
 
+        local esp = character:FindFirstChild(ESP_NAME)
 
-        -- =========================
-        -- SURVIVOR
-        -- =========================
+        if wantedType then
+            AddEsp(character, wantedType)
 
-        if player ~= LocalPlayer
-            and player.Team
-            and player.Team.Name == "Survivors"
-            and EspSurvivors then
-
-            AddEsp(character, "survival")
-
-        elseif espType == "survival" then
-
+        elseif esp then
             RemoveEsp(character)
         end
     end
