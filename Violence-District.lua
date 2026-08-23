@@ -635,11 +635,12 @@ local function filterWaypoints(waypoints)
 end
 
 
-local function CheckHitKiller(Part)
+local function CheckHitKiller(Part:BasePart)
     local hrp = LocalPlayer:FindFirstChild("HumanoidRootPart")
     local PartPos = Part.Position
     if config.AutoParry.HitboxVisible then
-        Part.Visible = true
+        Part.Transparency = 0
+        Part.Color = Color3.fromRGB(255,0,0)
     end
     local CheckDistance = (hrp.Position - PartPos).Magnitude
 
