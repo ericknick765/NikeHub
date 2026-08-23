@@ -926,7 +926,6 @@ task.spawn(function()
         end
         if config.AutoParry.AutoParry == true then
             ParrySetup()
-            ClickHold()
         end
     end
 end)
