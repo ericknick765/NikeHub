@@ -918,6 +918,7 @@ task.spawn(function()
         end
         if config.AutoParry.AutoParry then
             ParrySetup()
+            print("ParrySetup")
         end
     end
 end)
