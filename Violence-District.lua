@@ -916,9 +916,8 @@ task.spawn(function()
         if SkillCheckGenerator then
             AutoSkillCheck()
         end
-        if config.AutoParry.AutoParry then
+        if config.AutoParry.AutoParry == true then
             ParrySetup()
-            print("ParrySetup")
         end
     end
 end)
