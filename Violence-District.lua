@@ -7,6 +7,8 @@ local PathfindingService = game:GetService("PathfindingService")
 local CoreGui = game:GetService("CoreGui")
 local RunService = game:GetService("RunService")
 local GuiService = game:GetService("GuiService")
+local Teams = game:GetService("Teams")
+local Workspace = game:GetService("Workspace")
 
 local SessionName = "NIKE_HUB_SESSION"
 
@@ -127,6 +129,8 @@ local EspKiller = false
 local EspSurvivors = false
 local EspGenerators = false
 
+local Killer 
+
 local config = {
     EspKillerColor = {
         Color = Color3.fromRGB(255, 0, 0)
@@ -141,8 +145,9 @@ local config = {
     },
     AutoParry = {
         Distance = 4,
-        ParryDelay = 0.2,
-        AutoParry = false
+        ParryDelay = 0,
+        AutoParry = false,
+        HitboxVisible = false
     }
 }
 
@@ -214,7 +219,6 @@ local function AddEsp(character, action)
 end
 
 local function UpdateEsp()
-    local Killer
 
     for _, player in Players:GetPlayers() do
         if player.Team and player.Team.Name == "Killer" then
@@ -631,6 +635,46 @@ local function filterWaypoints(waypoints)
 end
 
 
+local function CheckHitKiller(Part)
+    local hrp = LocalPlayer:FindFirstChild("HumanoidRootPart")
+    local PartPos = Part.Position
+    if config.AutoParry.HitboxVisible then
+        Part.Visible = true
+    end
+    local CheckDistance = (hrp.Position - PartPos).Magnitude
+
+    if CheckDistance > config.AutoParry.Distance then return end
+    task.wait(config.AutoParry.ParryDelay)
+    UseItemMobileButton(0.1)
+end
+
+local function ParrySetup()
+    if not Killer then return end
+    if Killer:GetAttribute("AutoParryMonitoring") == true then return end
+
+    Killer:SetAttribute("AutoParryMonitoring", true)
+
+    local User = Killer.UserId
+    if not User then return end
+
+    local ConnectionParry
+
+    ConnectionParry = Workspace.ChildAdded:Connect(function(Parry)
+        for _, v in ipairs(Workspace:GetChildren()) do
+            if v.Name == v.Name:lower():find(User) then
+                CheckHitKiller(v)
+                break
+            end
+        end
+    end)
+
+    if Killer:GetPropertyChangedSignal("Teams") then
+        ConnectionParry:Disconnect()
+        Killer:SetAttribute("AutoParryMonitoring", false)
+    end
+end
+
+
 local function MoveToPosition(character, targetPosition, maxAttempts, callback)
     maxAttempts = maxAttempts or 3
 
@@ -818,6 +862,10 @@ local ToggleAutoParry = sector31.element('Toggle', 'Auto Parry', false, function
     config.AutoParry.AutoParry = v
 end)
 
+local ToggleAutoParryHitBox = sector31.element('Toggle', 'Killer HitBox', false, function(v)
+    config.AutoParry.HitboxVisible = v
+end)
+
 
 task.spawn(function()
     while Session.Running do
@@ -829,6 +877,9 @@ task.spawn(function()
 
         if SkillCheckGenerator then
             AutoSkillCheck()
+        end
+        if config.AutoParry.AutoParry then
+            ParrySetup()
         end
     end
 end)
