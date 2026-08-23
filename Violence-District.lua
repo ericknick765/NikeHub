@@ -654,8 +654,11 @@ local function CheckHitKiller(part: BasePart)
         part.Color = Color3.fromRGB(255, 0, 0)
     end
 
-    local distance = (hrp.Position - Killer.Character:WaitForChild("HumanoidRootPart").Position).Magnitude
-    print(distance)
+    local distance = (hrp.Position - part.Position).Magnitude
+    
+    print("Player:", hrp.Position)
+    print("Hitbox:", part.Position)
+    print("Distance:", (hrp.Position - part.Position).Magnitude)
 
     if distance > config.AutoParry.Distance then
         return
