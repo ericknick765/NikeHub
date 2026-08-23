@@ -715,6 +715,11 @@ local function ParrySetup()
     end)
 end
 
+local function ClickHold()
+    local Bool = Killer:GetAttribute("clickhold")
+    print(Bool)
+end
+
 
 local function MoveToPosition(character, targetPosition, maxAttempts, callback)
     maxAttempts = maxAttempts or 3
@@ -921,6 +926,7 @@ task.spawn(function()
         end
         if config.AutoParry.AutoParry == true then
             ParrySetup()
+            ClickHold()
         end
     end
 end)
