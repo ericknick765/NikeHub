@@ -635,44 +635,70 @@ local function filterWaypoints(waypoints)
 end
 
 
-local function CheckHitKiller(Part:BasePart)
-    local hrp = LocalPlayer:FindFirstChild("HumanoidRootPart")
-    local PartPos = Part.Position
-    if config.AutoParry.HitboxVisible then
-        Part.Transparency = 0
-        Part.Color = Color3.fromRGB(255,0,0)
+local function CheckHitKiller(part: BasePart)
+    local character = LocalPlayer.Character
+    if not character then
+        return
     end
-    local CheckDistance = (hrp.Position - PartPos).Magnitude
 
-    if CheckDistance > config.AutoParry.Distance then return end
-    task.wait(config.AutoParry.ParryDelay)
-    UseItemMobileButton(0.1)
+    local hrp = character:FindFirstChild("HumanoidRootPart")
+    if not hrp then
+        return
+    end
+
+    if config.AutoParry.HitboxVisible then
+        part.Transparency = 0
+        part.Color = Color3.fromRGB(255, 0, 0)
+    end
+
+    local distance = (hrp.Position - part.Position).Magnitude
+
+    if distance > config.AutoParry.Distance then
+        return
+    end
+
+    task.delay(config.AutoParry.ParryDelay, function()
+        UseItemMobileButton(0.1)
+    end)
 end
 
 local function ParrySetup()
-    if not Killer then return end
-    if Killer:GetAttribute("AutoParryMonitoring") == true then return end
+    if not Killer then
+        return
+    end
+
+    if Killer:GetAttribute("AutoParryMonitoring") then
+        return
+    end
 
     Killer:SetAttribute("AutoParryMonitoring", true)
 
-    local User = Killer.UserId
-    if not User then return end
+    local connections = {}
 
-    local ConnectionParry
-
-    ConnectionParry = Workspace.ChildAdded:Connect(function(Parry)
-        for _, v in ipairs(Workspace:GetChildren()) do
-            if v.Name == v.Name:lower():find(User) then
-                CheckHitKiller(v)
-                break
-            end
+    connections.ChildAdded = Workspace.ChildAdded:Connect(function(instance)
+        
+        if not instance:IsA("BasePart") then
+            return
         end
+        CheckHitKiller(instance)
+    end)
+    
+    connections.TeamChanged = Killer:GetPropertyChangedSignal("Team"):Connect(function()
+        for _, connection in pairs(connections) do
+            connection:Disconnect()
+        end
+        Killer:SetAttribute("AutoParryMonitoring", false)
     end)
 
-    if Killer:GetPropertyChangedSignal("Team") then
-        ConnectionParry:Disconnect()
+    connections.AncestryChanged = Killer.AncestryChanged:Connect(function(_, parent)
+        if parent then
+            return
+        end
+        for _, connection in pairs(connections) do
+            connection:Disconnect()
+        end
         Killer:SetAttribute("AutoParryMonitoring", false)
-    end
+    end)
 end
 
 
