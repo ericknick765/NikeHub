@@ -634,6 +634,9 @@ local function filterWaypoints(waypoints)
     return filtered
 end
 
+local function IsKillerHitbox(part: Instance, userId: number): boolean
+    return string.find(part.Name, tostring(userId), 1, true) ~= nil
+end
 
 local function CheckHitKiller(part: BasePart)
     local character = LocalPlayer.Character
@@ -652,6 +655,7 @@ local function CheckHitKiller(part: BasePart)
     end
 
     local distance = (hrp.Position - part.Position).Magnitude
+    print(distance)
 
     if distance > config.AutoParry.Distance then
         return
@@ -671,6 +675,8 @@ local function ParrySetup()
         return
     end
 
+    local userId = Killer.UserId
+
     Killer:SetAttribute("AutoParryMonitoring", true)
 
     local connections = {}
@@ -680,9 +686,14 @@ local function ParrySetup()
         if not instance:IsA("BasePart") then
             return
         end
+
+        if not IsKillerHitbox(instance, userId) then
+            return
+        end
+        print(instance)
         CheckHitKiller(instance)
     end)
-    
+
     connections.TeamChanged = Killer:GetPropertyChangedSignal("Team"):Connect(function()
         for _, connection in pairs(connections) do
             connection:Disconnect()
