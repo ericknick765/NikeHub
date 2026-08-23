@@ -668,7 +668,7 @@ local function ParrySetup()
         end
     end)
 
-    if Killer:GetPropertyChangedSignal("Teams") then
+    if Killer:GetPropertyChangedSignal("Team") then
         ConnectionParry:Disconnect()
         Killer:SetAttribute("AutoParryMonitoring", false)
     end
