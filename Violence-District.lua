@@ -649,16 +649,16 @@ local function CheckHitKiller(part: BasePart)
         return
     end
 
-    if config.AutoParry.HitboxVisible then
-        part.Transparency = 0
-        part.Color = Color3.fromRGB(255, 0, 0)
-    end
-
     local distance = (hrp.Position - part.Position).Magnitude
     
     print("Player:", hrp.Position)
     print("Hitbox:", part.Position)
     print("Distance:", (hrp.Position - part.Position).Magnitude)
+
+    if config.AutoParry.HitboxVisible then
+        part.Transparency = 0
+        part.Color = Color3.fromRGB(255, 0, 0)
+    end
 
     if distance > config.AutoParry.Distance then
         return
@@ -714,12 +714,6 @@ local function ParrySetup()
         Killer:SetAttribute("AutoParryMonitoring", false)
     end)
 end
-
-local function ClickHold()
-    local Bool = Killer:GetAttribute("clickhold")
-    print(Bool)
-end
-
 
 local function MoveToPosition(character, targetPosition, maxAttempts, callback)
     maxAttempts = maxAttempts or 3
@@ -911,7 +905,6 @@ end)
 local ToggleAutoParryHitBox = sector31.element('Toggle', 'Killer HitBox', false, function(v)
     config.AutoParry.HitboxVisible = v
 end)
-
 
 task.spawn(function()
     while Session.Running do
