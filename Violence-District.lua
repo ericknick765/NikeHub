@@ -694,7 +694,6 @@ local function ParrySetup()
         if not IsKillerHitbox(instance, userId) then
             return
         end
-        print(instance)
         CheckHitKiller(instance)
     end)
 
