@@ -890,7 +890,7 @@ local buttonParry = sector31.element('Button', 'Parry Test', nil, function()
     UseItemMobileButton(0.1)
 end)
 
-local SliderDistanceAutoParry = sector31.element('Slider', 'Distance', {default = {min = 1, max = 5, default = 4}}, function(v)
+local SliderDistanceAutoParry = sector31.element('Slider', 'Distance', {default = {min = 1, max = 500, default = 20}}, function(v)
    config.AutoParry.Distance = v
 end)
 
