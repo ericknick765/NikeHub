@@ -640,6 +640,7 @@ end
 
 local function CheckHitKiller(part: BasePart)
     local character = LocalPlayer.Character
+    local maxDistance = tonumber(config.AutoParry.Distance)
     if not character then
         return
     end
@@ -660,7 +661,7 @@ local function CheckHitKiller(part: BasePart)
         part.Color = Color3.fromRGB(255, 0, 0)
     end
 
-    if distance > config.AutoParry.Distance then
+    if distance > maxDistance then
         return
     end
 
@@ -890,7 +891,7 @@ local buttonParry = sector31.element('Button', 'Parry Test', nil, function()
     UseItemMobileButton(0.1)
 end)
 
-local SliderDistanceAutoParry = sector31.element('Slider', 'Distance', {default = {min = 1, max = 500, default = 20}}, function(v)
+local SliderDistanceAutoParry = sector31.element('Slider', 'Distance', {default = {min = 1, max = 1000, default = 20}}, function(v)
    config.AutoParry.Distance = v
 end)
 
