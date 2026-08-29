@@ -46,9 +46,9 @@ local function TargetPlayerSetup()
 			print(
 				AttributeName,
 				"mudou:",
-				LastValue,
+				math.floor(LastValue),
 				"->",
-				NewValue
+				math.floor(NewValue)
 			)
 
 			LastValue = NewValue
