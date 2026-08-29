@@ -42,14 +42,8 @@ local function TargetPlayerSetup()
 
 		Player:GetAttributeChangedSignal(AttributeName):Connect(function()
 			local NewValue = Player:GetAttribute(AttributeName)
-
-			print(
-				AttributeName,
-				"mudou:",
-				math.floor(LastValue),
-				"->",
-				math.floor(NewValue)
-			)
+			
+			library:Notify("Attributo: " .. AttributeName .." Mudou: " .. math.floor(LastValue) .." -> " .. math.floor(NewValue) .. math.floor(LastValue - NewValue),5)
 
 			LastValue = NewValue
 
