@@ -10,6 +10,7 @@ end
 local MainWindow = library:Window("Farm Xp Bot")
 
 local MonitoringAttibute = false
+local AttributeConnection
 local TargetPlayer
 
 Players.PlayerAdded:Connect(function(player)
@@ -40,7 +41,7 @@ local function TargetPlayerSetup()
 	for AttributeName, LastValue in Attributes do
 		print(AttributeName, "inicial:", LastValue)
 
-		Player:GetAttributeChangedSignal(AttributeName):Connect(function()
+		AttributeConnection = Player:GetAttributeChangedSignal(AttributeName):Connect(function()
 			local NewValue = Player:GetAttribute(AttributeName)
 			
 			library:Notify("Attributo: " .. AttributeName .." Mudou: " .. math.floor(LastValue) .." -> " .. math.floor(NewValue) .. " +" .. math.floor(NewValue - LastValue),5)
@@ -64,5 +65,6 @@ MainWindow:Toggle("Monitoring", function(state)
         TargetPlayerSetup()
     else
         library:Notify("Monitoring Desativated!", 3)
+		AttributeConnection:Disconnect()
     end
 end)
