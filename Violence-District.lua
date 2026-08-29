@@ -640,7 +640,9 @@ end
 
 local function CheckHitKiller(part: BasePart)
     local character = LocalPlayer.Character
+
     local maxDistance = tonumber(config.AutoParry.Distance)
+    
     if not character then
         return
     end
