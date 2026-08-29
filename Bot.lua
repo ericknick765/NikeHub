@@ -1,12 +1,24 @@
 local library = loadstring(game:HttpGet("https://raw.githubusercontent.com/ericknick765/NikeHub/refs/heads/main/Library/LibraryBot.Lua"))()
 
 local Players = game:GetService("Players")
+local PlayerNames = {}
+
+for _, Player in ipairs(Players:GetPlayers()) do
+	table.insert(PlayerNames, Player.Name)
+end
 
 local MainWindow = library:Window("Auto Race Start Bot")
 
 local MonitoringAttibute = false
-
 local TargetPlayer
+
+Players.PlayerAdded:Connect(function(player)
+	table.insert(PlayerNames, player.Name)
+end)
+
+Players.PlayerRemoving:Connect(function(player)
+	table.remove(PlayerNames, player.Name)
+end)
 
 local function TargetPlayerSetup()
 	local Player = Players:FindFirstChild(TargetPlayer)
@@ -40,9 +52,8 @@ local function TargetPlayerSetup()
 	end
 end
 
-
-MainWindow:Box("Player Name", "Name", function(BoxPlayer)
-    TargetPlayer = tostring(BoxPlayer)
+MainWindow:Dropdown("Player", PlayerNames, function(Selected)
+	TargetPlayer = tostring(Selected)
     library:Notify("Agora detectando: " .. TargetPlayer, 5)
 end)
 
