@@ -7,7 +7,7 @@ for _, Player in ipairs(Players:GetPlayers()) do
 	table.insert(PlayerNames, Player.Name)
 end
 
-local MainWindow = library:Window("Auto Race Start Bot")
+local MainWindow = library:Window("Farm Xp Bot")
 
 local MonitoringAttibute = false
 local TargetPlayer
@@ -17,7 +17,11 @@ Players.PlayerAdded:Connect(function(player)
 end)
 
 Players.PlayerRemoving:Connect(function(player)
-	table.remove(PlayerNames, player.Name)
+	local index = table.find(PlayerNames, player.Name)
+
+	if index then
+		table.remove(PlayerNames, index)
+	end
 end)
 
 local function TargetPlayerSetup()
@@ -47,6 +51,8 @@ local function TargetPlayerSetup()
 				NewValue
 			)
 
+			LastValue = NewValue
+
 			Attributes[AttributeName] = NewValue
 		end)
 	end
@@ -57,7 +63,7 @@ MainWindow:Dropdown("Player", PlayerNames, function(Selected)
     library:Notify("Agora detectando: " .. TargetPlayer, 5)
 end)
 
-MainWindow:Toggle("Auto-Start", function(state)
+MainWindow:Toggle("Monitoring", function(state)
     MonitoringAttibute = state
     if state then
         library:Notify("Monitoring Started", 3)
