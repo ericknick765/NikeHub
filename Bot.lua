@@ -1,6 +1,4 @@
-local library = loadstring(game:HttpGet(
-	"https://raw.githubusercontent.com/ericknick765/NikeHub/refs/heads/main/Library/LibraryBot.Lua"
-))()
+local library = loadstring(game:HttpGet("https://raw.githubusercontent.com/ericknick765/NikeHub/refs/heads/main/Library/LibraryBot.Lua"))()
 
 --// Services
 local TweenService = game:GetService("TweenService")
