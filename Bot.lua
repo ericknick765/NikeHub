@@ -199,7 +199,9 @@ local function TweenConstantSpeed(Object, TargetPosition, Speed, Callback)
 
 	if HRPClone and HRPClone:IsA("BasePart") then
 		local Weld = HRPClone:FindFirstChild("WeldConstraint")
-		Weld:Destroy()
+		if Weld then
+			Weld:Destroy()
+		end
 	end
 
 	if Callback then
