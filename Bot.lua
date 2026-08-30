@@ -149,7 +149,6 @@ end
 --==================================================
 
 local function TweenConstantSpeed(Object, TargetPosition, Speed, Callback)
-	task.wait(3)
 	if not Object or not Object.Parent then
 		return
 	end
@@ -477,7 +476,7 @@ local function StartHookMonitor()
 				Character:GetAttributeChangedSignal(
 					"IsHooked"
 				):Connect(function()
-
+					task.wait(5)
 					UpdateHookedPlayer(Player)
 
 				end)
