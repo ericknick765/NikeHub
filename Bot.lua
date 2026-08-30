@@ -1,101 +1,160 @@
-local library = loadstring(game:HttpGet("https://raw.githubusercontent.com/ericknick765/NikeHub/refs/heads/main/Library/LibraryBot.Lua"))()
+local library = loadstring(game:HttpGet(
+	"https://raw.githubusercontent.com/ericknick765/NikeHub/refs/heads/main/Library/LibraryBot.Lua"
+))()
 
+--// Services
 local TweenService = game:GetService("TweenService")
 local VirtualInputManager = game:GetService("VirtualInputManager")
 local GuiService = game:GetService("GuiService")
-local CoreGui = game:GetService("CoreGui")
 local Players = game:GetService("Players")
+
+--// Players
 local LocalPlayer = Players.LocalPlayer
+local PlayerGui = LocalPlayer:WaitForChild("PlayerGui")
+
 local PlayerNames = {}
 
 for _, Player in ipairs(Players:GetPlayers()) do
-	if Player == LocalPlayer then return end
-	table.insert(PlayerNames, Player.Name)
+	if Player ~= LocalPlayer then
+		table.insert(PlayerNames, Player.Name)
+	end
 end
 
+--// Window
 local MainWindow = library:Window("Farm Xp Bot")
 
+--// Constants
 local TouchID = 8822
 local ActionPath = "Survivor-mob.Controls.action.check"
 
-local MonitoringAttibute = false
+--// State
+local MonitoringAttribute = false
+local TargetPlayer = nil
+
 local AttributeConnections = {}
 local HookConnections = {}
 local PlayersHooked = {}
-local TargetPlayer
-local PlayerGui = LocalPlayer:WaitForChild("PlayerGui")
 
+--// Config
 local Config = {
-	["TweenSpeed"] = 10,
-	["TeleportMode"] = false,
-	["AutoSave"] = false
+	TweenSpeed = 10,
+	TeleportMode = false,
+	AutoSave = false
 }
 
-Players.PlayerAdded:Connect(function(player)
-	table.insert(PlayerNames, player.Name)
-end)
 
-Players.PlayerRemoving:Connect(function(player)
-	local index = table.find(PlayerNames, player.Name)
+--//==================================================
+--// PLAYER LIST
+--//==================================================
 
-	if index then
-		table.remove(PlayerNames, index)
+Players.PlayerAdded:Connect(function(Player)
+	if Player == LocalPlayer then
+		return
+	end
+
+	if not table.find(PlayerNames, Player.Name) then
+		table.insert(PlayerNames, Player.Name)
 	end
 end)
 
+Players.PlayerRemoving:Connect(function(Player)
+	local Index = table.find(PlayerNames, Player.Name)
+
+	if Index then
+		table.remove(PlayerNames, Index)
+	end
+end)
+
+
+--//==================================================
+--// ACTION BUTTON
+--//==================================================
+
 local function GetActionTarget()
-    local current = PlayerGui
-    for segment in string.gmatch(ActionPath, "[^%.]+") do
-        current = current and current:FindFirstChild(segment)
-    end
-    return current
+	local Current = PlayerGui
+
+	for Segment in string.gmatch(ActionPath, "[^%.]+") do
+		Current = Current and Current:FindFirstChild(Segment)
+	end
+
+	return Current
 end
 
-local function WaitForActionTarget(timeout)
-    timeout = timeout or 1
-    local interval = 0.05
-    local attempts = math.floor(timeout / interval)
-    local target = GetActionTarget()
-    local tries = 0
-    while
-        (not target or not target:IsA("GuiObject"))
-        and tries < attempts
-    do
-        task.wait(interval)
-        target = GetActionTarget()
-        tries += 1
-    end
-    if target and target:IsA("GuiObject") then
-        return target
-    end
-    return nil
+
+local function WaitForActionTarget(Timeout)
+	Timeout = Timeout or 1
+
+	local Interval = 0.05
+	local Attempts = math.floor(Timeout / Interval)
+
+	local Target = GetActionTarget()
+	local Tries = 0
+
+	while (not Target or not Target:IsA("GuiObject")) and Tries < Attempts do
+		task.wait(Interval)
+
+		Target = GetActionTarget()
+		Tries += 1
+	end
+
+	if Target and Target:IsA("GuiObject") then
+		return Target
+	end
+
+	return nil
 end
 
-local function TriggerMobileButton(timeout)
 
-    local button = WaitForActionTarget(timeout)
+local function TriggerMobileButton(Timeout)
+	local Button = WaitForActionTarget(Timeout)
 
-    if not button then
-        return false
-    end
+	if not Button then
+		return false
+	end
 
-    local position = button.AbsolutePosition
-    local size = button.AbsoluteSize
-    local inset = GuiService:GetGuiInset()
+	local Position = Button.AbsolutePosition
+	local Size = Button.AbsoluteSize
+	local Inset = GuiService:GetGuiInset()
 
-    local x = position.X + (size.X / 2) + inset.X
-    local y = position.Y + (size.Y / 2) + inset.Y
+	local X = Position.X + (Size.X / 2) + Inset.X
+	local Y = Position.Y + (Size.Y / 2) + Inset.Y
 
-    local success = pcall(function()
-        VirtualInputManager:SendTouchEvent(TouchID,0,x,y)
-        task.wait(0.01)
-        VirtualInputManager:SendTouchEvent(TouchID,2,x,y)
-    end)
-    return success
+	local Success = pcall(function()
+		VirtualInputManager:SendTouchEvent(
+			TouchID,
+			0,
+			X,
+			Y
+		)
+
+		task.wait(0.01)
+
+		VirtualInputManager:SendTouchEvent(
+			TouchID,
+			2,
+			X,
+			Y
+		)
+	end)
+
+	return Success
 end
+
+
+--//==================================================
+--// CONSTANT SPEED TWEEN
+--//==================================================
 
 local function TweenConstantSpeed(Object, Goal, Speed, Callback)
-	if not Object or not Speed or Speed <= 0 then
+	if not Object or not Object.Parent then
+		return
+	end
+
+	if not Goal or not Goal.Parent then
+		return
+	end
+
+	if not Speed or Speed <= 0 then
 		return
 	end
 
@@ -103,21 +162,34 @@ local function TweenConstantSpeed(Object, Goal, Speed, Callback)
 	local TargetPosition = Goal.Position
 
 	local Distance = (TargetPosition - StartPosition).Magnitude
+
+	if Distance <= 0.01 then
+		if Callback then
+			Callback()
+		end
+
+		return
+	end
+
 	local Duration = Distance / Speed
 
-	local TweenInfo = TweenInfo.new(
-		Duration,
-		Enum.EasingStyle.Linear,
-		Enum.EasingDirection.InOut
+	local Tween = TweenService:Create(
+		Object,
+		TweenInfo.new(
+			Duration,
+			Enum.EasingStyle.Linear,
+			Enum.EasingDirection.InOut
+		),
+		{
+			Position = TargetPosition
+		}
 	)
 
-	local Tween = TweenService:Create(Object, TweenInfo, {
-		Position = TargetPosition
-	})
-
 	if Callback then
-		Tween.Completed:Connect(function()
-			Callback()
+		Tween.Completed:Connect(function(State)
+			if State == Enum.PlaybackState.Completed then
+				Callback()
+			end
 		end)
 	end
 
@@ -125,6 +197,11 @@ local function TweenConstantSpeed(Object, Goal, Speed, Callback)
 
 	return Tween
 end
+
+
+--//==================================================
+--// ATTRIBUTE MONITOR
+--//==================================================
 
 local function TargetPlayerCleanup()
 	for _, Connection in ipairs(AttributeConnections) do
@@ -134,7 +211,16 @@ local function TargetPlayerCleanup()
 	table.clear(AttributeConnections)
 end
 
+
 local function TargetPlayerSetup()
+	-- Remove conexões do alvo anterior
+	TargetPlayerCleanup()
+
+	if not TargetPlayer then
+		warn("Nenhum Player selecionado.")
+		return
+	end
+
 	local Player = Players:FindFirstChild(TargetPlayer)
 
 	if not Player then
@@ -142,19 +228,12 @@ local function TargetPlayerSetup()
 		return
 	end
 
-	-- Desconecta conexões anteriores
-	for _, Connection in pairs(AttributeConnections) do
-		Connection:Disconnect()
-	end
-
-	table.clear(AttributeConnections)
-
 	local Attributes = {
 		EXP = Player:GetAttribute("EXP"),
 		ExpinRound = Player:GetAttribute("ExpinRound"),
 	}
 
-	for AttributeName, LastValue in Attributes do
+	for AttributeName, LastValue in pairs(Attributes) do
 		print(AttributeName, "inicial:", LastValue)
 
 		local Connection = Player:GetAttributeChangedSignal(AttributeName):Connect(function()
@@ -164,11 +243,15 @@ local function TargetPlayerSetup()
 				return
 			end
 
+			local Difference = math.floor(NewValue - LastValue)
+
+			local Sign = Difference >= 0 and "+" or ""
+
 			library:Notify(
 				"Attributo: " .. AttributeName ..
 				" Mudou: " .. math.floor(LastValue) ..
 				" -> " .. math.floor(NewValue) ..
-				" +" .. math.floor(NewValue - LastValue),
+				" " .. Sign .. Difference,
 				5
 			)
 
@@ -180,74 +263,12 @@ local function TargetPlayerSetup()
 	end
 end
 
-local function UpdateHookedPlayer(Player)
-	local Character = Player.Character
-	if not Character then
-		return
-	end
 
-	local hrp = Character:FindFirstChild("HumanoidRootPart")
-	if not hrp then
-		return
-	end
+--//==================================================
+--// HOOK MONITOR
+--//==================================================
 
-	local LocalCharacter = LocalPlayer.Character
-	if not LocalCharacter then
-		return
-	end
-
-	local LocalHrp = LocalCharacter:FindFirstChild("HumanoidRootPart")
-	if not LocalHrp then
-		return
-	end
-
-	local IsHooked = Character:GetAttribute("HookProgressDepleting")
-	local Index = table.find(PlayersHooked, Player)
-
-	if IsHooked then
-		if not Index then
-			table.insert(PlayersHooked, Player)
-
-			print(Player.Name, "está no Hook")
-
-			local TargetPosition =
-				hrp.Position + hrp.CFrame.LookVector * 10
-
-			TweenConstantSpeed(
-				LocalHrp,
-				TargetPosition,
-				Config.TweenSpeed,
-				TriggerMobileButton(1)
-			)
-		end
-	else
-		if Index then
-			table.remove(PlayersHooked, Index)
-
-			print(Player.Name, "saiu do Hook")
-		end
-	end
-end
-
-local function StartHookMonitor()
-	StopHookMonitor()
-
-	for _, Player in ipairs(Players:GetPlayers()) do
-		local Character = Player.Character
-
-		if Character then
-			UpdateHookedPlayer(Player)
-
-			local Connection = Character:GetAttributeChangedSignal("HookProgressDepleting"):Connect(function()
-				UpdateHookedPlayer(Player)
-			end)
-
-			table.insert(HookConnections, Connection)
-		end
-	end
-end
-
-function StopHookMonitor()
+local function StopHookMonitor()
 	for _, Connection in ipairs(HookConnections) do
 		Connection:Disconnect()
 	end
@@ -256,35 +277,161 @@ function StopHookMonitor()
 	table.clear(PlayersHooked)
 end
 
+
+local function UpdateHookedPlayer(Player)
+	local Character = Player.Character
+
+	if not Character then
+		return
+	end
+
+	local HRP = Character:FindFirstChild("HumanoidRootPart")
+
+	if not HRP then
+		return
+	end
+
+	local LocalCharacter = LocalPlayer.Character
+
+	if not LocalCharacter then
+		return
+	end
+
+	local LocalHRP = LocalCharacter:FindFirstChild("HumanoidRootPart")
+
+	if not LocalHRP then
+		return
+	end
+
+	local IsHooked = Character:GetAttribute("HookProgressDepleting")
+	local Index = table.find(PlayersHooked, Player)
+
+	if IsHooked then
+
+		-- Evita duplicar o Player na tabela
+		if not Index then
+			table.insert(PlayersHooked, Player)
+
+			print(Player.Name, "está no Hook")
+
+			local TargetPosition =
+				HRP.Position + HRP.CFrame.LookVector * 10
+
+			TweenConstantSpeed(
+				LocalHRP,
+				{
+					Position = TargetPosition
+				},
+				Config.TweenSpeed,
+				function()
+					print("Chegou na posição do Hook:", Player.Name)
+
+					TriggerMobileButton(1)
+				end
+			)
+		end
+
+	else
+
+		if Index then
+			table.remove(PlayersHooked, Index)
+
+			print(Player.Name, "saiu do Hook")
+		end
+	end
+end
+
+
+local function StartHookMonitor()
+	-- Limpa monitor anterior
+	StopHookMonitor()
+
+	for _, Player in ipairs(Players:GetPlayers()) do
+
+		if Player == LocalPlayer then
+			continue
+		end
+
+		local Character = Player.Character
+
+		if Character then
+			UpdateHookedPlayer(Player)
+
+			local Connection = Character:GetAttributeChangedSignal(
+				"HookProgressDepleting"
+			):Connect(function()
+				UpdateHookedPlayer(Player)
+			end)
+
+			table.insert(HookConnections, Connection)
+		end
+	end
+end
+
+
+--//==================================================
+--// UI
+--//==================================================
+
 MainWindow:Dropdown("Player", PlayerNames, function(Selected)
 	TargetPlayer = tostring(Selected)
-    library:Notify("Agora detectando: " .. TargetPlayer, 5)
+
+	library:Notify(
+		"Agora detectando: " .. TargetPlayer,
+		5
+	)
+
+	-- Se já estiver monitorando, troca o alvo imediatamente
+	if MonitoringAttribute then
+		TargetPlayerSetup()
+	end
 end)
 
-MainWindow:Toggle("Monitoring", function(state)
-    MonitoringAttibute = state
-    if state then
-        library:Notify("Monitoring Started", 3)
-        TargetPlayerSetup()
-    else
-        library:Notify("Monitoring Desativated!", 3)
+
+MainWindow:Toggle("Monitoring", function(State)
+	MonitoringAttribute = State
+
+	if State then
+		library:Notify(
+			"Monitoring Started",
+			3
+		)
+
+		TargetPlayerSetup()
+
+	else
+		library:Notify(
+			"Monitoring Desativated!",
+			3
+		)
+
 		TargetPlayerCleanup()
-    end
+	end
 end)
+
 
 MainWindow:Box("Tween Speed", "Number", function(Box)
 	local Speed = tonumber(Box)
 
 	if not Speed or Speed <= 0 then
+		library:Notify(
+			"Tween Speed inválido!",
+			3
+		)
+
 		return
 	end
 
 	Config.TweenSpeed = Speed
+
+	print("Tween Speed:", Config.TweenSpeed)
 end)
+
 
 MainWindow:Toggle("Teleport Mode", function(State)
 	Config.TeleportMode = State
 end)
+
 
 MainWindow:Toggle("Auto Save", function(State)
 	Config.AutoSave = State
@@ -295,4 +442,3 @@ MainWindow:Toggle("Auto Save", function(State)
 		StopHookMonitor()
 	end
 end)
-
