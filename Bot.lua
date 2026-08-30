@@ -338,7 +338,7 @@ local function UpdateHookedPlayer(Player)
 	end
 
 	local IsHooked =
-		Character:GetAttribute("HookProgressDepleting")
+		Character:GetAttribute("IsHooked")
 
 	local Index =
 		table.find(PlayersHooked, Player)
