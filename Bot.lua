@@ -465,7 +465,7 @@ local function StartHookMonitor()
 			-- Monitora mudanças
 			local Connection =
 				Character:GetAttributeChangedSignal(
-					"HookProgressDepleting"
+					"IsHooked"
 				):Connect(function()
 
 					UpdateHookedPlayer(Player)
