@@ -369,7 +369,7 @@ local function UpdateHookedPlayer(Player)
 		-- Posição 10 studs na frente do alvo
 		local TargetPosition =
 			HRP.Position
-			+ HRP.CFrame.LookVector * 10
+			+ HRP.CFrame.LookVector * 3
 
 
 		--==================================================
