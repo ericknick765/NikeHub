@@ -149,6 +149,7 @@ end
 --==================================================
 
 local function TweenConstantSpeed(Object, TargetPosition, Speed, Callback)
+	task.wait(3)
 	if not Object or not Object.Parent then
 		return
 	end
@@ -187,7 +188,6 @@ local function TweenConstantSpeed(Object, TargetPosition, Speed, Callback)
 		Enum.EasingDirection.InOut
 	)
 
-	task.wait(1)
 	local HRPTween = TweenService:Create(
 		HRP,
 		TweenInfoData,
@@ -200,7 +200,7 @@ local function TweenConstantSpeed(Object, TargetPosition, Speed, Callback)
 	local CloneTween
 
 	if HRPClone and HRPClone:IsA("BasePart") then
-		local Weld = HRP:FindFirstChild("WeldConstraint")
+		local Weld = HRPClone:FindFirstChild("WeldConstraint")
 		Weld:Destroy()
 	end
 
