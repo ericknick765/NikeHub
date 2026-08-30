@@ -187,7 +187,7 @@ local function TweenConstantSpeed(Object, TargetPosition, Speed, Callback)
 		Enum.EasingDirection.InOut
 	)
 
-	-- Tween do HRP principal
+	task.wait(1)
 	local HRPTween = TweenService:Create(
 		HRP,
 		TweenInfoData,
@@ -200,16 +200,10 @@ local function TweenConstantSpeed(Object, TargetPosition, Speed, Callback)
 	local CloneTween
 
 	if HRPClone and HRPClone:IsA("BasePart") then
-		CloneTween = TweenService:Create(
-			HRPClone,
-			TweenInfoData,
-			{
-				Position = TargetPosition
-			}
-		)
+		local Weld = HRP:FindFirstChild("WeldConstraint")
+		Weld:Destroy()
 	end
 
-	-- Callback somente quando o HRP principal terminar
 	if Callback then
 		HRPTween.Completed:Connect(function(State)
 			if State == Enum.PlaybackState.Completed then
@@ -394,7 +388,7 @@ local function UpdateHookedPlayer(Player)
 		--==================================================
 
 		if Config.TeleportMode then
-
+			task.wait(1)
 			LocalHRP.CFrame =
 				CFrame.new(
 					TargetPosition,
@@ -405,7 +399,6 @@ local function UpdateHookedPlayer(Player)
 				"Teleportado para:",
 				Player.Name
 			)
-
 			TriggerMobileButton(1)
 
 			return
