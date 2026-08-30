@@ -3,6 +3,7 @@ local library = loadstring(game:HttpGet("https://raw.githubusercontent.com/erick
 local TweenService = game:GetService("TweenService")
 local VirtualInputManager = game:GetService("VirtualInputManager")
 local GuiService = game:GetService("GuiService")
+local CoreGui = game:GetService("CoreGui")
 local Players = game:GetService("Players")
 local LocalPlayer = Players.LocalPlayer
 local PlayerNames = {}
@@ -22,6 +23,7 @@ local AttributeConnections = {}
 local HookConnections = {}
 local PlayersHooked = {}
 local TargetPlayer
+local PlayerGui = LocalPlayer:WaitForChild("PlayerGui")
 
 local Config = {
 	["TweenSpeed"] = 10,
