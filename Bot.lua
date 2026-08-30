@@ -149,28 +149,27 @@ end
 --==================================================
 
 local function TweenConstantSpeed(Object, TargetPosition, Speed, Callback)
-
 	if not Object or not Object.Parent then
 		return
 	end
 
 	if typeof(TargetPosition) ~= "Vector3" then
-		warn("TargetPosition precisa ser Vector3")
 		return
 	end
 
 	if not Speed or Speed <= 0 then
-		warn("Speed inválido:", Speed)
 		return
 	end
 
-	local StartPosition = Object.Position
+	-- HRP principal
+	local HRP = Object
 
-	local Distance = (
-		TargetPosition - StartPosition
-	).Magnitude
+	-- Procura o clone dentro do HRP
+	local HRPClone = HRP:FindFirstChild("HRP_clone")
 
-	-- Já está no destino
+	-- Distância até o destino
+	local Distance = (TargetPosition - HRP.Position).Magnitude
+
 	if Distance <= 0.01 then
 		if Callback then
 			Callback()
@@ -179,36 +178,54 @@ local function TweenConstantSpeed(Object, TargetPosition, Speed, Callback)
 		return
 	end
 
-	-- Distância / velocidade = duração
+	-- Velocidade constante
 	local Duration = Distance / Speed
 
-	local Tween = TweenService:Create(
-		Object,
+	local TweenInfoData = TweenInfo.new(
+		Duration,
+		Enum.EasingStyle.Linear,
+		Enum.EasingDirection.InOut
+	)
 
-		TweenInfo.new(
-			Duration,
-			Enum.EasingStyle.Linear,
-			Enum.EasingDirection.InOut
-		),
-
+	-- Tween do HRP principal
+	local HRPTween = TweenService:Create(
+		HRP,
+		TweenInfoData,
 		{
 			Position = TargetPosition
 		}
 	)
 
-	if Callback then
-		Tween.Completed:Connect(function(State)
+	-- Tween do HRP_clone, caso exista
+	local CloneTween
 
+	if HRPClone and HRPClone:IsA("BasePart") then
+		CloneTween = TweenService:Create(
+			HRPClone,
+			TweenInfoData,
+			{
+				Position = TargetPosition
+			}
+		)
+	end
+
+	-- Callback somente quando o HRP principal terminar
+	if Callback then
+		HRPTween.Completed:Connect(function(State)
 			if State == Enum.PlaybackState.Completed then
 				Callback()
 			end
-
 		end)
 	end
 
-	Tween:Play()
+	-- Inicia os dois praticamente juntos
+	HRPTween:Play()
 
-	return Tween
+	if CloneTween then
+		CloneTween:Play()
+	end
+
+	return HRPTween, CloneTween
 end
 
 
