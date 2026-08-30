@@ -165,7 +165,7 @@ local function TweenConstantSpeed(Object, TargetPosition, Speed, Callback)
 	local HRP = Object
 
 	-- Procura o clone dentro do HRP
-	local HRPClone = HRP:FindFirstChild("HRP_clone")
+	local HRPClone = HRP:FindFirstChild("HRP_Clone")
 
 	-- Distância até o destino
 	local Distance = (TargetPosition - HRP.Position).Magnitude
@@ -195,7 +195,6 @@ local function TweenConstantSpeed(Object, TargetPosition, Speed, Callback)
 		}
 	)
 
-	-- Tween do HRP_clone, caso exista
 	local CloneTween
 
 	if HRPClone and HRPClone:IsA("BasePart") then
