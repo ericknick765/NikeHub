@@ -270,21 +270,24 @@ MainWindow:Toggle("Monitoring", function(state)
     end
 end)
 
-MainWindow:Box("Tween Speed ","Number", function(Box)
-	if typeof(Box) ~= "number" then
+MainWindow:Box("Tween Speed", "Number", function(Box)
+	local Speed = tonumber(Box)
+
+	if not Speed or Speed <= 0 then
 		return
 	end
-	Config.TweenSpeed = Box
 
+	Config.TweenSpeed = Speed
 end)
 
-MainWindow:Toggle("Teleport Mode", function(state)
-    Config.TeleportMode = state
+MainWindow:Toggle("Teleport Mode", function(State)
+	Config.TeleportMode = State
 end)
 
-MainWindow:Toggle("Auto Save", function(state)
-    Config.AutoSave = state
-	if Config.AutoSave then
+MainWindow:Toggle("Auto Save", function(State)
+	Config.AutoSave = State
+
+	if State then
 		StartHookMonitor()
 	else
 		StopHookMonitor()
