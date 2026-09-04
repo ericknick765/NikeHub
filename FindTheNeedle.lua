@@ -238,7 +238,7 @@ local function CheckCarrying()
 		if Config.DeployMode then
 			Teleport()
 		else
-			Teleport(CFrame.new(5, 0, 0))
+			Teleport(CFrame.new(0, 0, 10))
 		end
     end
 end
