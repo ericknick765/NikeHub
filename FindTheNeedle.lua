@@ -269,6 +269,7 @@ end)
 
 MainWindow:Toggle("Auto DropAll", function(state)
     Config.AutoDropAll = state
+    print("Teste")
 end)
 
 MainWindow:Toggle("Show Range", function(state)
