@@ -19,6 +19,7 @@ local V = LocalPlayer.PlayerGui
 local Config = {
     ["SpeedCollect"] = 0.1,
     ["AutoCollect"] = false,
+    ["AutoDropAll"] = false,
     ["ShowRange"] = false,
     ["SpeedDeploy"] = 1,
     ["DeployMode"] = false
@@ -47,7 +48,7 @@ local FRACAO_TRACO = 0.7  -- % do espaço ocupado por cada traço (maior = traç
 local ESPESSURA = 0.3     -- espessura radial do traço (largura)
 local ALTURA_TRACO = 0.2  -- grossura vertical do traço
 local COR = Color3.fromRGB(0, 200, 255)
-local TRANSPARENCIA = 0.3
+local TRANSPARENCIA = 0
 local ALTURA_ACIMA_DO_CHAO = 0.1
 -- ========================
  
@@ -245,9 +246,7 @@ local function CheckCarrying()
 		if Config.DeployMode then
 			Teleport()
 		else
-            for i = 1, 10 do
-                TryDropRequest()
-            end
+            TryDropRequest()
 		end
     end
 end
@@ -266,6 +265,10 @@ end)
 
 MainWindow:Toggle("Auto Collect", function(state)
     Config.AutoCollect = state
+end)
+
+MainWindow:Toggle("Auto DropAll", function(state)
+    Config.AutoDropAll = state
 end)
 
 MainWindow:Toggle("Show Range", function(state)
@@ -288,6 +291,9 @@ task.spawn(function()
     while true do
         if Config.AutoCollect then
             PullNearest()
+        end
+        if Config.AutoDropAll then
+            TryDropRequest()
         end
         task.wait(Config.SpeedCollect)
     end
