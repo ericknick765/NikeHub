@@ -225,6 +225,16 @@ local function Teleport(Offset)
     HRP.CFrame = PosSave
 end
 
+local function TryDropRequest()
+    local Character = LocalPlayer.Character
+    if not Character then return end
+
+    local HRP = Character:FindFirstChild("HumanoidRootPart")
+    if not HRP then return end
+
+	DropRequestEvent:FireServer(HRP.CFrame ,HRP.CFrame.LookVector)
+end
+
 local function CheckCarrying()
     local Current, Max = V.Text:match("(%d+)%s*/%s*(%d+)")
 
@@ -235,13 +245,9 @@ local function CheckCarrying()
 		if Config.DeployMode then
 			Teleport()
 		else
-            local Character = LocalPlayer.Character
-            if not Character then return end
-
-            local HRP = Character:FindFirstChild("HumanoidRootPart")
-            if not HRP then return end
-
-			DropRequestEvent:FireServer(HRP.CFrame ,HRP.CFrame.LookVector)
+            for i = 1, 10 do
+                TryDropRequest()
+            end
 		end
     end
 end
