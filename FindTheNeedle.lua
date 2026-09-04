@@ -252,7 +252,7 @@ CheckCarrying()
 MainWindow:Box("Speed Collect","0.1 to 1", function(SpeedBox)
     local Number = tonumber(SpeedBox)
     if Number then
-        Config.SpeedCollect = Number
+        Config.SpeedCollect = math.clamp(Number, 0.05, 1)
     end
 end)
 
@@ -268,7 +268,7 @@ end)
 MainWindow:Box("Speed Deploy","0.1 to 1", function(SpeedBox)
     local Number = tonumber(SpeedBox)
     if Number then
-        Config.SpeedDeploy = Number
+        Config.SpeedDeploy = math.clamp(Number, 0.05, 1)
     end
 end)
 
@@ -277,8 +277,10 @@ MainWindow:Toggle("Deploy Mode", function(state)
 end)
 
 task.spawn(function()
-	while Config.AutoCollect do
-		PullNearest()
-		task.wait(Config.SpeedCollect)
-	end
+    while true do
+        if Config.AutoCollect then
+            PullNearest()
+        end
+        task.wait(Config.SpeedCollect)
+    end
 end)
