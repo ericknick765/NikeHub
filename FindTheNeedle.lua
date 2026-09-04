@@ -220,7 +220,6 @@ local function Teleport(Offset)
     local PosSave = HRP.CFrame 
 
     HRP.CFrame = ClearPos * Offset
-    DropRequestEvent:FireServer(CFrame.new(HRP.CFrame),Vector3.new(0, 0, 0))
     
     task.wait(Config.SpeedDeploy)
     HRP.CFrame = PosSave
@@ -236,7 +235,13 @@ local function CheckCarrying()
 		if Config.DeployMode then
 			Teleport()
 		else
-			Teleport(CFrame.new(0,0,10))
+            local Character = LocalPlayer.Character
+            if not Character then return end
+
+            local HRP = Character:FindFirstChild("HumanoidRootPart")
+            if not HRP then return end
+
+			DropRequestEvent:FireServer(CFrame.new(HRP.CFrame),Vector3.new(0, 0, 0))
 		end
     end
 end
