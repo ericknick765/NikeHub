@@ -194,6 +194,15 @@ local function GetNearestS()
     return NearestPart, NearestTile, NearestNumber, NearestDistance
 end
 
+local function TryDropRequest()
+    local Character = LocalPlayer.Character
+    if not Character then return end
+
+    local HRP = Character:FindFirstChild("HumanoidRootPart")
+    if not HRP then return end
+
+	DropRequestEvent:FireServer(HRP.CFrame ,HRP.CFrame.LookVector)
+end
 
 local function PullNearest()
     local Part, TileName, Number, Distance = GetNearestS()
@@ -207,6 +216,10 @@ local function PullNearest()
     end
 
     PullRequestEvent:FireServer(TileName, Number)
+
+    if Config.AutoDropAll then
+        TryDropRequest()
+    end
 end
 
 local function Teleport(Offset)
@@ -224,16 +237,6 @@ local function Teleport(Offset)
     
     task.wait(Config.SpeedDeploy)
     HRP.CFrame = PosSave
-end
-
-local function TryDropRequest()
-    local Character = LocalPlayer.Character
-    if not Character then return end
-
-    local HRP = Character:FindFirstChild("HumanoidRootPart")
-    if not HRP then return end
-
-	DropRequestEvent:FireServer(HRP.CFrame ,HRP.CFrame.LookVector)
 end
 
 local function CheckCarrying()
@@ -292,9 +295,6 @@ task.spawn(function()
     while true do
         if Config.AutoCollect then
             PullNearest()
-        end
-        if Config.AutoDropAll then
-            TryDropRequest()
         end
         task.wait(Config.SpeedCollect)
     end
