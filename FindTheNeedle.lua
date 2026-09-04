@@ -145,7 +145,7 @@ local function GetNearestS()
     local NearestPart = nil
     local NearestTile = nil
     local NearestNumber = nil
-    local NearestDistance = 20
+    local NearestDistance = math.huge
 
     for _, Object in ipairs(DisturbedTiles:GetDescendants()) do
 
@@ -235,7 +235,7 @@ local function CheckCarrying()
 			Teleport()
 		else
 			Teleport(CFrame.new(0, 10, 0))
-			
+
 			DropRequestEvent:FireServer(
 				CFrame.new(47.79959487915, 4.2953653335571, 80.743003845215, 0.73176431655884, 0.035197224467993, -0.68064832687378, -0.048043582588434, 0.99884533882141, -2.1000516881031e-09, 0.67986232042313, 0.032700788229704, 0.73261028528214),
 				Vector3.new(0.73176431655884, -0.048043582588434, 0.67986238002777)
