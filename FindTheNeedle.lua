@@ -149,21 +149,17 @@ local function GetNearestS()
     local NearestDistance = 16
 
     for _, Object in ipairs(DisturbedTiles:GetDescendants()) do
-
         if Object:IsA("BasePart") then
+
             local Number = Object.Name:match("^S(%d+)$")
 
             if Number then
-                local Tile = Object:FindFirstAncestorWhichIsA("Model")
-
-                if not Tile then
-                    Tile = Object:FindFirstAncestorWhichIsA("Folder")
-                end
-
                 local Current = Object.Parent
+                local Tile = nil
 
                 while Current and Current ~= DisturbedTiles do
-                    local TileName = Current.Name:match("^(T_%d+)_live$")
+
+                    local TileName = Current.Name:match("^(T%d?_%d+)_live$")
 
                     if TileName then
                         Tile = Current
@@ -174,7 +170,7 @@ local function GetNearestS()
                 end
 
                 if Tile then
-                    local TileName = Tile.Name:match("^(T_%d+)_live$")
+                    local TileName = Tile.Name:match("^(T%d?_%d+)_live$")
 
                     if TileName then
                         local Distance = (HRP.Position - Object.Position).Magnitude
