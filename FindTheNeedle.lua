@@ -241,7 +241,7 @@ local function CheckCarrying()
             local HRP = Character:FindFirstChild("HumanoidRootPart")
             if not HRP then return end
 
-			DropRequestEvent:FireServer(CFrame.new(HRP.CFrame),Vector3.new(0, 0, 0))
+			DropRequestEvent:FireServer(HRP.CFrame,Vector3.new(0, 0, 0))
 		end
     end
 end
