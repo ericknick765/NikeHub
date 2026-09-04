@@ -145,7 +145,7 @@ local function GetNearestS()
     local NearestPart = nil
     local NearestTile = nil
     local NearestNumber = nil
-    local NearestDistance = math.huge
+    local NearestDistance = 16
 
     for _, Object in ipairs(DisturbedTiles:GetDescendants()) do
 
